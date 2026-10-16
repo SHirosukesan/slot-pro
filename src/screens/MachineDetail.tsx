@@ -53,6 +53,8 @@ export function MachineDetail({
   const cur = app.counters[key] ?? null;
   const j = judge(m, cur, morning, reset, aim);
   const ceilName = `${j.morningApplied ? '朝一' : ''}${aim === 'CZ' ? 'CZ天井' : '天井'}`;
+  // 大きく出す数字：天井狙い＝現在G数、CZ狙い＝CZ天井までの残り
+  const big = aim === 'CZ' ? j.distance : cur;
   const fav = app.favorites.includes(m.machineId);
   const rule = j.rule;
   const adv = m.advantageousSectionRules;
@@ -162,25 +164,37 @@ export function MachineDetail({
           )}
           <div className="flex items-center justify-between gap-2">
             <span className="text-[14px] text-sub">
-              現在の{aim === 'CZ' && !morning ? 'CZ' : ''}
-              {counterName(j.unit)}
+              {aim === 'CZ' ? `${ceilName}までのゲーム数` : `現在の${counterName(j.unit)}`}
             </span>
             <StatePill state={j.state} label={j.state === 'go' ? '今打てる' : j.label} big />
           </div>
           <button onClick={() => setSheet('count')} className="flex items-baseline gap-1 group mt-1" aria-label="現在値を入力">
-            <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-detail-big)' }}>
-              {cur == null ? '---' : fmtNum(cur)}
+            <span className={`num font-extrabold leading-none ${big == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-detail-big)' }}>
+              {big == null ? '---' : fmtNum(big)}
             </span>
-            <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{unitText(j.unit)}</span>
+            <span className={`num text-[28px] font-bold ${big == null ? 'text-dim' : stateText(j.state)}`}>{unitText(j.unit)}</span>
             <Pencil size={16} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
           </button>
-          {j.distance != null && (
-            <div className="mt-2 text-[14px] text-sub">
-              {ceilName}まで{' '}
-              <b className={`num text-[18px] ${j.distance === 0 ? 'text-prio' : 'text-fg'}`}>
-                {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${unitText(j.ceiling?.unit ?? '')}`}
-              </b>
-            </div>
+          {aim === 'CZ' ? (
+            <button onClick={() => setSheet('count')} className="mt-2 text-[14px] text-sub text-left">
+              現在の{counterName(j.unit)}{' '}
+              <b className="num text-[18px] text-fg">{cur == null ? '未入力（タップで入力）' : `${fmtNum(cur)}${unitText(j.unit)}`}</b>
+              {j.ceiling?.value != null && (
+                <span className="text-dim">
+                  {' '}／ {ceilName} {fmtNum(j.ceiling.value)}
+                  {unitText(j.ceiling.unit)}
+                </span>
+              )}
+            </button>
+          ) : (
+            j.distance != null && (
+              <div className="mt-2 text-[14px] text-sub">
+                {ceilName}まで{' '}
+                <b className={`num text-[18px] ${j.distance === 0 ? 'text-prio' : 'text-fg'}`}>
+                  {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${unitText(j.ceiling?.unit ?? '')}`}
+                </b>
+              </div>
+            )
           )}
         </div>
 
