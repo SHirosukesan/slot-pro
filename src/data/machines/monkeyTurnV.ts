@@ -18,6 +18,8 @@ export const monkeyTurnV: Machine = {
   manufacturer: null,
   image: { src: null, credit: null, license: '未確認' },
   hue: 214,
+  // ハイエナは周期（優出モード＝CZ）狙いが中心
+  mainAim: 'CZ',
   counterUnit: 'G',
   entryRules: [
     {
@@ -31,10 +33,26 @@ export const monkeyTurnV: Machine = {
       status: 'sample',
       sources: [],
     },
+    {
+      // CZ狙い＝周期狙い（優出モード到達までの周期数で数える）。狙い目の周期数は未確認
+      id: 'cz',
+      aim: 'CZ',
+      condition: '通常',
+      unit: '周期',
+      minLine: null,
+      recommended: null,
+      ev: null,
+      target: '液晶の周期数（優出モード1回＝1周期）',
+      status: 'unverified',
+      sources: [],
+    },
   ],
   ceilingRules: {
     normal: sourcedNum(795, 'G', [CH_mk, AL_mk], '+α。ほかに周期天井（最大6周期）あり'),
     morning: sourcedNum(495, 'G', [CH_mk, AL_mk], '設定変更時・青島vs波多野敗北後。周期天井は最大4周期に短縮。+α'),
+    // CZ天井＝周期天井（優出モードを1周期として数える）
+    cz: sourcedNum(6, '周期', [CH_mk, AL_mk], '周期天井。通常Aは6周期、通常Bは3周期、天国は1周期'),
+    czMorning: sourcedNum(4, '周期', [CH_mk, AL_mk], '設定変更時・青島vs波多野敗北後は最大4周期'),
   },
   quitRules: [
     { id: 'after-at', situation: 'AT後', checkCount: 0, unit: 'G', action: '即ヤメ', status: 'sample', sources: [] },

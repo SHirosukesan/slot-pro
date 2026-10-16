@@ -233,6 +233,8 @@ export interface Machine {
   image: MachineImage;
   /** 代替表示用の色相 (0-360) */
   hue: number;
+  /** 主に狙うのは天井かCZか。天井とCZの残りを単位が違って比べられない時はこちらを優先 */
+  mainAim?: AimType;
   /** 当たりまでを数える単位の既定値。狙い目ルールに単位があればそちらを優先 */
   counterUnit: Unit;
   entryRules: EntryRule[];

@@ -166,7 +166,7 @@ export function MachineDetail({
           )}
           <div className="flex items-center justify-between gap-2">
             <span className="text-[14px] text-sub">
-              {showCzCeiling ? ceilName : aim === 'CZ' ? `${ceilName}までのゲーム数` : `現在の${counterName(j.unit)}`}
+              {showCzCeiling ? ceilName : aim === 'CZ' ? `${ceilName}までの${j.unit === 'G' || j.unit === '液晶G' ? 'ゲーム数' : `${j.unit}数`}` : `現在の${counterName(j.unit)}`}
             </span>
             <StatePill state={j.state} label={j.state === 'go' ? '今打てる' : j.label} big />
           </div>

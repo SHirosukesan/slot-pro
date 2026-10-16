@@ -43,6 +43,7 @@ export const machineSchema = z.object({
     license: z.enum(['未確認', '許諾済み', '自作', 'メーカー提供']),
   }),
   hue: z.number().min(0).max(360),
+  mainAim: z.enum(['天井', 'CZ']).optional(),
   counterUnit: unit,
   entryRules: z.array(entry),
   ceilingRules: z.object({ normal: numVal, morning: numVal, cz: numVal.optional(), czMorning: numVal.optional(), benefit: textVal.optional() }),

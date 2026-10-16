@@ -98,6 +98,7 @@ describe('天井狙いとCZ狙い', () => {
   });
   it('CZの仕組みが無い機種はCZ狙いの対象外', () => {
     expect(hasAim(machineById('slot.smart.hokuto-no-ken.v1')!, 'CZ')).toBe(false);
+    expect(hasAim(machineById('slot.smart.monkey-turn-v.v1')!, 'CZ')).toBe(true);
     expect(hasAim(tokyoGhoul, 'CZ')).toBe(true);
   });
   it('天井を超えていたら残り0（到達）', () => {
@@ -253,5 +254,16 @@ describe('期待値順：天井とCZの近い方', () => {
   it('CZの仕組みが無い機種・CZ現在値が無い時は天井', () => {
     expect(nearestTarget(machineById('slot.smart.hokuto-no-ken.v1')!, slot(810, 999))).toMatchObject({ aim: '天井', distance: 458 });
     expect(nearestTarget(tokyoGhoul, slot(680, null))).toMatchObject({ aim: '天井', distance: 520 });
+  });
+});
+
+describe('モンキーV：CZ狙い＝周期狙い', () => {
+  const mk = () => machineById('slot.smart.monkey-turn-v.v1')!;
+  it('周期天井 6周期（リセット時4周期）まで、周期で数える', () => {
+    expect(judge(mk(), 2, false, '不明', 'CZ')).toMatchObject({ unit: '周期', distance: 4 });
+    expect(judge(mk(), 1, true, 'リセット', 'CZ').distance).toBe(3);
+  });
+  it('期待値順ではGと周期は比べず、主な狙い（CZ）を出す', () => {
+    expect(nearestTarget(mk(), { current: 420, czCurrent: 3, resetState: '不明' })).toMatchObject({ aim: 'CZ', distance: 3, unit: '周期' });
   });
 });

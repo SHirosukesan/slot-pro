@@ -61,6 +61,13 @@ export const nearestTarget = (m: Machine, slot: Pick<SlotEntry, 'current' | 'czC
     const c = judge(m, slot.czCurrent, false, slot.resetState, 'CZ');
     if (c.distance != null) cands.push({ aim: 'CZ', distance: c.distance, unit: c.unit, current: slot.czCurrent });
   }
+  // G と 液晶G はどちらもゲーム数なので比べてよい
+  const family = (u: Unit) => (u === 'G' || u === '液晶G' ? 'game' : u);
+  if (cands.length === 2 && family(cands[0]!.unit) !== family(cands[1]!.unit)) {
+    // G と 周期 のように単位が違うと残りを比べられない → 機種の主な狙いを優先
+    const main = m.mainAim ?? '天井';
+    return cands.find((c) => c.aim === main) ?? cands[0]!;
+  }
   cands.sort((a, b) => a.distance - b.distance);
   return cands[0] ?? null;
 };
