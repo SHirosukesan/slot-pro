@@ -72,6 +72,15 @@ describe('画面', () => {
     expect(screen.getByText('ガックン')).toBeInTheDocument();
   });
 
+  it('CZの狙い目は「狙い目」と「朝イチ」で変わる', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('tab', { name: 'CZ' }));
+    expect(screen.getAllByText('150G〜').length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('tab', { name: '朝イチ' }));
+    expect(screen.getAllByText(/朝イチCZ狙い目/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('0G〜').length).toBeGreaterThan(0);
+  });
+
   it('狙う対象をCZにするとCZの対象機種だけになる', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('tab', { name: 'CZ' }));

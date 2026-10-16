@@ -104,7 +104,7 @@ export function QuickJudge({
           const fav = app.favorites.includes(m.machineId);
           const ceil = j.ceiling?.value ?? null;
           const showCeiling = j.state === 'prio' && ceil != null;
-          const ceilName = `${j.morningApplied ? '朝一' : ''}${AIM_LABEL[aim]}`;
+          const ceilName = `${j.morningCeiling && j.ceiling !== m.ceilingRules.normal && j.ceiling !== m.ceilingRules.cz ? '朝一' : ''}${AIM_LABEL[aim]}`;
           // 大きく出す数字：天井狙い＝現在G数、CZ狙い＝CZまでの残りG数
           const big = aim === 'CZ' ? j.distance : cur;
           // CZ狙いで現在G数が未入力なら、CZ天井そのものを出しておく（入力すると残りに変わる）
@@ -228,7 +228,7 @@ export function QuickJudge({
                       </span>
                     </>
                   )}
-                  {reset === '不明' && <span className="text-dim">※リセット時のみ朝イチ狙い目で判定</span>}
+                  {reset === '不明' && <span className="text-dim">※狙い目は朝イチ用。朝一天井はリセットを選んだ時だけ使う</span>}
                 </div>
               )}
             </li>

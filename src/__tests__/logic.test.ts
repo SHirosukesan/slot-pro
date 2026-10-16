@@ -39,12 +39,22 @@ describe('通常天井と朝一天井の区別', () => {
     // 北斗はリセット（設定変更）で800Gに短縮
     expect(judge(machineById('slot.smart.hokuto-no-ken.v1')!, 100, true, 'リセット').ceiling?.value).toBe(800);
   });
-  it('朝イチでも不明・据え置きはリセット扱いしない', () => {
+  it('朝イチでも不明・据え置きは朝一天井を使わない', () => {
     for (const s of ['不明', '据え置き'] as const) {
       const r = judge(machineById('slot.smart.hokuto-no-ken.v1')!, 100, true, s);
-      expect(r.morningApplied).toBe(false);
+      expect(r.morningCeiling).toBe(false);
       expect(r.ceiling?.value).toBe(1268);
     }
+  });
+  it('朝イチ表示の狙い目：不明・リセットは朝イチ用、据え置きは通常', () => {
+    expect(judge(tokyoGhoul, 30, true, '不明', 'CZ').rule?.id).toBe('cz-morning');
+    expect(judge(tokyoGhoul, 30, true, 'リセット', 'CZ').rule?.id).toBe('cz-morning');
+    expect(judge(tokyoGhoul, 30, true, '据え置き', 'CZ').rule?.id).toBe('cz');
+    expect(judge(tokyoGhoul, 30, false, '不明', 'CZ').rule?.id).toBe('cz');
+    // 朝イチの狙い目が無い機種は通常の狙い目
+    const r = judge(machineById('slot.smart.hokuto-no-ken.v1')!, 100, true, '不明');
+    expect(r.morningApplied).toBe(false);
+    expect(r.rule?.id).toBe('normal');
   });
   it('判定区分', () => {
     expect(judge(tokyoGhoul, 600, false, '不明').state).toBe('go');
@@ -75,6 +85,7 @@ describe('機種ごとの数え方の単位', () => {
   });
   it('単位が違う天井とは距離を計算しない', () => {
     expect(distanceTo(num(999, 'G'), 500, 'あべし')).toBeNull();
+    expect(distanceTo(num(600, '液晶G'), 450, 'G')).toBe(150);
     expect(distanceTo(num(999, 'あべし'), 500, 'あべし')).toBe(499);
   });
 });

@@ -52,7 +52,7 @@ export function MachineDetail({
   const key = counterKey(m.machineId, aim, morning);
   const cur = app.counters[key] ?? null;
   const j = judge(m, cur, morning, reset, aim);
-  const ceilName = `${j.morningApplied ? '朝一' : ''}${aim === 'CZ' ? 'CZ天井' : '天井'}`;
+  const ceilName = `${j.morningCeiling && j.ceiling !== m.ceilingRules.normal && j.ceiling !== m.ceilingRules.cz ? '朝一' : ''}${aim === 'CZ' ? 'CZ天井' : '天井'}`;
   // 大きく出す数字：天井狙い＝現在G数、CZ狙い＝CZ天井までの残り
   const big = aim === 'CZ' ? j.distance : cur;
   // CZ狙いで現在G数が未入力なら、CZ天井そのものを出す（入力すると残りに変わる）
@@ -281,7 +281,7 @@ export function MachineDetail({
             )}
           </dl>
           {reset === '不明' && morning && (
-            <p className="px-card pb-3 text-[12px] text-dim">「リセット」を選ぶと朝イチ狙い目・朝一天井で判定します。示唆・推測だけでリセット確定にはしません。</p>
+            <p className="px-card pb-3 text-[12px] text-dim">朝イチの狙い目で判定しています。朝一天井は「リセット」を選んだ時だけ使います（示唆・推測だけでリセット確定にはしません）。</p>
           )}
         </section>
       )}
