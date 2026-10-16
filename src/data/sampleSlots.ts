@@ -8,6 +8,7 @@ export const SAMPLE_SLOTS: SlotEntry[] = [
   { id: 's3', machineId: 'slot.smart.monkey-turn-v.v1', current: 420, unit: 'G', skipCount: 3, resetState: '据え置き', storeName: 'サンプル店', unitNumber: '0815', ev: 600, evCondition: SAMPLE_EV_CONDITION, estimatedMinutes: 25, isSample: true },
   { id: 's4', machineId: 'slot.smart.karakuri-circus.v1', current: 310, unit: 'G', skipCount: null, resetState: '不明', storeName: null, unitNumber: null, ev: 400, evCondition: SAMPLE_EV_CONDITION, estimatedMinutes: 30, isSample: true },
   { id: 's5', machineId: 'slot.smart.valvrave.v1', current: 260, unit: 'G', skipCount: 4, resetState: 'リセット', storeName: null, unitNumber: null, ev: 300, evCondition: SAMPLE_EV_CONDITION, estimatedMinutes: 20, isSample: true },
+  { id: 's8', machineId: 'slot.smart.karakuri-circus.v1', current: 80, unit: 'G', skipCount: null, resetState: '据え置き', storeName: null, unitNumber: null, ev: -1200, evCondition: SAMPLE_EV_CONDITION, estimatedMinutes: 60, isSample: true },
   // 計算条件が違う行（現金投資）→ 同条件と混ぜて順位付けしない
   { id: 's6', machineId: 'slot.smart.valvrave.v1', current: 350, unit: 'G', skipCount: 2, resetState: '据え置き', storeName: null, unitNumber: null, ev: 900, evCondition: { ...SAMPLE_EV_CONDITION, play: '現金' }, estimatedMinutes: 30, isSample: true },
   // 期待値の根拠なし → 未算出

@@ -121,7 +121,7 @@ describe('有利区間', () => {
 describe('期待値ランキング', () => {
   it('期待値の高い順', () => {
     const { ranked } = rankSlots(SAMPLE_SLOTS, SAMPLE_EV_CONDITION);
-    expect(ranked.map((r) => r.ev)).toEqual([2300, 1800, 600, 400, 300]);
+    expect(ranked.map((r) => r.ev)).toEqual([2300, 1800, 600, 400, 300, -1200]);
   });
   it('計算条件が違う行と未算出の行は順位外', () => {
     const { excluded } = rankSlots(SAMPLE_SLOTS, SAMPLE_EV_CONDITION);

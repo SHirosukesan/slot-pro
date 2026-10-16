@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { ChevronRight, Crown, Info, Settings } from 'lucide-react';
+import { Crown, Info, Settings } from 'lucide-react';
 import { machineById } from '../data/machines';
 import { SAMPLE_SLOTS } from '../data/sampleSlots';
 import { rankSlots, type Excluded, type RankedSlot } from '../lib/ranking';
-import { fmtNum, fmtYen } from '../lib/format';
+import { fmtNum } from '../lib/format';
 import type { AppState } from '../state/useAppState';
 import { Logo, Segmented, Thumb } from '../components/ui';
 
@@ -75,31 +75,30 @@ function RankRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number;
   const top = rank <= 3;
   return (
     <li>
-      <button onClick={() => onOpen(m.machineId)} className="card w-full flex items-center gap-3 p-3 text-left hover:border-accent/50">
-        <div className="w-9 shrink-0 flex flex-col items-center">
+      <button onClick={() => onOpen(m.machineId)} className="card w-full flex items-center gap-2.5 p-2.5 text-left hover:border-accent/50">
+        <div className="w-7 shrink-0 flex flex-col items-center">
           {top && <Crown size={22} className={CROWN[rank - 1]} fill="currentColor" aria-hidden />}
           <span className={`num text-[26px] font-extrabold italic leading-none ${top ? CROWN[rank - 1] : 'text-sub'}`}>{rank}</span>
         </div>
-        <Thumb m={m} size="64px" rounded={10} />
+        <Thumb m={m} size="56px" rounded={10} />
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-[16px] leading-tight">{m.shortName}</div>
+          <div className="font-bold text-[16px] leading-tight truncate">{m.shortName}</div>
           <div className="text-[11px] text-sub">現在</div>
           <div className="num text-[22px] font-extrabold leading-none">
             {fmtNum(s.current)}
             <span className="text-[14px] ml-0.5">{s.unit}</span>
           </div>
-          <div className="text-[11px] text-dim mt-1 leading-snug">
+          <div className="text-[11px] text-dim mt-1 truncate">
             {[s.skipCount != null ? `スルー${s.skipCount}回` : null, s.resetState, s.storeName, s.unitNumber ? `${s.unitNumber}番` : null].filter(Boolean).join('・')}
           </div>
         </div>
-        <div className="text-right shrink-0">
-          <div className="text-[11px] text-sub">{showHourly ? '時給' : '期待値'}</div>
-          <div className="num text-[24px] font-extrabold text-go leading-tight">
-            {showHourly ? fmtYen(s.hourly ?? 0, true) : fmtYen(s.ev ?? 0, true)}
+        <div className="shrink-0 self-stretch flex flex-col justify-center items-end border-l border-line pl-2.5">
+          <div className="text-[12px] text-sub">{showHourly ? '時給' : '期待値'}</div>
+          <YenBig value={showHourly ? (s.hourly ?? 0) : (s.ev ?? 0)} />
+          <div className="num text-[11px] text-dim mt-0.5">
+            {showHourly ? `期待値 ${signedYen(s.ev ?? 0)}` : s.hourly != null ? `時給 ${signedYen(s.hourly)}` : ''}
           </div>
-          <div className="num text-[11px] text-dim">{showHourly ? fmtYen(s.ev ?? 0, true) : s.hourly != null ? `時給 ${fmtYen(s.hourly)}` : ''}</div>
         </div>
-        <ChevronRight size={20} className="text-dim shrink-0" aria-hidden />
       </button>
     </li>
   );
@@ -121,9 +120,31 @@ function ExcludedRow({ e, onOpen }: { e: Excluded; onOpen: (id: string) => void 
       <div className="text-right">
         <div className="text-[12px] font-bold text-near">{e.reason}</div>
         <div className="num text-[13px] text-sub">
-          {e.reason === '未算出' ? '未算出' : `${fmtYen(e.slot.ev ?? 0, true)}（${e.slot.evCondition?.play}）`}
+          {e.reason === '未算出' ? (
+            '未算出'
+          ) : (
+            <span className={(e.slot.ev ?? 0) < 0 ? 'text-prio' : ''}>
+              {signedYen(e.slot.ev ?? 0)}（{e.slot.evCondition?.play}）
+            </span>
+          )}
         </div>
       </div>
     </button>
+  );
+}
+
+/** 「+2,300円」「−1,200円」。プラスは緑、マイナスは赤 */
+const signedYen = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${fmtNum(Math.abs(n))}円`;
+
+function YenBig({ value }: { value: number }) {
+  const tone = value < 0 ? 'text-prio' : value > 0 ? 'text-go' : 'text-sub';
+  return (
+    <div className={`num font-extrabold leading-none whitespace-nowrap ${tone}`} data-testid="ev-value">
+      <span className="text-[26px]">
+        {value > 0 ? '+' : value < 0 ? '−' : '±'}
+        {fmtNum(Math.abs(value))}
+      </span>
+      <span className="text-[14px] ml-0.5">円</span>
+    </div>
   );
 }

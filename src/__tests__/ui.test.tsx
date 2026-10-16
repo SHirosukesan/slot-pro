@@ -60,5 +60,9 @@ describe('画面', () => {
     fireEvent.click(screen.getByRole('tab', { name: '期待値順' }));
     expect(screen.getByText('順位外')).toBeInTheDocument();
     expect(screen.getByText('条件不一致')).toBeInTheDocument();
+    const values = screen.getAllByTestId('ev-value');
+    expect(values[0]).toHaveClass('text-go');
+    expect(values[values.length - 1]).toHaveClass('text-prio');
+    expect(values[values.length - 1]).toHaveTextContent('−1,200円');
   });
 });
