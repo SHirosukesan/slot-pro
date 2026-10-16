@@ -26,7 +26,7 @@ export default {
       spacing: { card: 'var(--sp-card)', gutter: 'var(--sp-gutter)', thumb: 'var(--thumb)' },
       fontFamily: {
         jp: ['"Noto Sans JP"', '"Hiragino Sans"', '"Yu Gothic"', 'sans-serif'],
-        num: ['Outfit', '"Noto Sans JP"', 'system-ui', 'sans-serif'],
+        num: ['"Chakra Petch"', '"Noto Sans JP"', 'system-ui', 'sans-serif'],
       },
     },
   },

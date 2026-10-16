@@ -26,6 +26,8 @@
   --c-bronze: 215 154 92;
   /* 期待値（プラス）の金額 */
   --c-ev: 70 207 127;
+  /* 文字 */
+  --font-num: 'Chakra Petch', 'Noto Sans JP', system-ui, sans-serif; /* 数字・ロゴ */
   /* 形 */
   --r-card: 18px;
   --sp-card: 14px;

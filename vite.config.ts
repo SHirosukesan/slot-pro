@@ -41,7 +41,11 @@ export default defineConfig(({ mode }) => ({
           },
         }),
   ],
-  build: { outDir: mode === 'singlefile' ? 'dist-preview' : 'dist' },
+  build: {
+    outDir: mode === 'singlefile' ? 'dist-preview' : 'dist',
+    // プレビュー用は1ファイルにするのでフォントも埋め込む
+    assetsInlineLimit: mode === 'singlefile' ? 100_000_000 : 4096,
+  },
   test: {
     environment: 'jsdom',
     globals: true,
