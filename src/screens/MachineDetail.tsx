@@ -305,7 +305,7 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
       <h2 className="text-[16px] font-bold mt-1">詳しく見る</h2>
       <div className="flex flex-col gap-2">
         {(['settei', 'reset', 'advantage'] as const).map((k) => (
-          <LinkRow key={k} link={m.sourceLinks.find((l) => l.kind === k) ?? { kind: k, site: null, url: null }} />
+          <LinkGroup key={k} kind={k} links={m.sourceLinks.filter((l) => l.kind === k && l.url)} />
         ))}
       </div>
 
@@ -413,29 +413,39 @@ const LINK_META = {
   advantage: { label: '有利区間', Icon: FileText },
 } as const;
 
-const LinkRow = ({ link }: { link: XLink }) => {
-  const { label, Icon } = LINK_META[link.kind];
-  const inner = (
-    <>
-      <Icon size={20} className={link.url ? 'text-accent' : 'text-dim'} aria-hidden />
-      <span className="font-bold">{label}</span>
-      {link.url ? (
-        <>
-          <span className="ml-auto text-[12px] text-sub">{link.site}</span>
-          <ExternalLink size={18} className="text-sub" aria-hidden />
-        </>
-      ) : (
+/** 1項目（設定推測など）に複数サイトのリンク。登録が無ければ「リンク未登録」 */
+const LinkGroup = ({ kind, links }: { kind: XLink['kind']; links: XLink[] }) => {
+  const { label, Icon } = LINK_META[kind];
+  if (links.length === 0) {
+    return (
+      <div className="card flex items-center gap-3 px-card h-[52px] opacity-70" aria-disabled="true" data-testid={`link-${kind}-missing`}>
+        <Icon size={20} className="text-dim" aria-hidden />
+        <span className="font-bold">{label}</span>
         <span className="ml-auto text-[12px] text-dim">リンク未登録</span>
-      )}
-    </>
-  );
-  return link.url ? (
-    <a href={link.url} target="_blank" rel="noopener noreferrer" className="card flex items-center gap-3 px-card h-[52px] hover:border-accent/60">
-      {inner}
-    </a>
-  ) : (
-    <div className="card flex items-center gap-3 px-card h-[52px] opacity-70" aria-disabled="true" data-testid={`link-${link.kind}-missing`}>
-      {inner}
+      </div>
+    );
+  }
+  return (
+    <div className="card px-card py-3 flex flex-col gap-2.5" role="group" aria-label={label}>
+      <div className="flex items-center gap-3">
+        <Icon size={20} className="text-accent" aria-hidden />
+        <span className="font-bold">{label}</span>
+        <ExternalLink size={16} className="ml-auto text-sub" aria-hidden />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {links.map((l) => (
+          <a
+            key={l.url}
+            href={l.url ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${label}（${l.site}）`}
+            className="tile flex items-center justify-center h-10 px-1 text-[12px] font-bold text-fg whitespace-nowrap hover:text-accent"
+          >
+            {l.site}
+          </a>
+        ))}
+      </div>
     </div>
   );
 };

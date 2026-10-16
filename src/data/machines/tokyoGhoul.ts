@@ -75,11 +75,17 @@ export const tokyoGhoul: Machine = {
     benefit: text('上位AT'),
     detection: text('液晶の示唆'),
   },
-  // 外部攻略リンク（該当記事へ直接）。設定推測の中身はアプリに持たない
+  // 外部攻略リンク（該当記事・該当見出しへ直接）。1種類に複数サイト可。設定推測の中身はアプリに持たない
   sourceLinks: [
     { kind: 'settei', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/889/27249/', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/spiky/226073/#index-10', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'アルテマ', url: 'https://altema.jp/pachimo/ltokyoghoulseetei', referencedAt: '2026-10-17' },
     { kind: 'reset', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/889/27253/', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/spiky/226073/#index-8', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'アルテマ', url: 'https://altema.jp/pachimo/ltokyoghoulreset', referencedAt: '2026-10-17' },
     { kind: 'advantage', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/889/27254/', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/spiky/226073/#index-9', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'アルテマ', url: 'https://altema.jp/pachimo/ltokyoghoulending', referencedAt: '2026-10-17' },
   ],
   verifiedAt: null,
   verificationStatus: 'sample',

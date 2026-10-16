@@ -45,7 +45,8 @@ describe('画面', () => {
     expect(screen.getByText('有利区間', { selector: 'h2' })).toBeInTheDocument();
     expect(screen.getByText('+2,400枚')).toBeInTheDocument();
     expect(screen.getByText('+1,000枚')).toBeInTheDocument();
-    const settei = screen.getByRole('link', { name: /設定推測/ });
+    expect(screen.getAllByRole('link', { name: /設定推測/ })).toHaveLength(3);
+    const settei = screen.getByRole('link', { name: '設定推測（ななプレス）' });
     expect(settei).toHaveAttribute('href', 'https://nana-press.com/kaiseki/machine/889/27249/');
     expect(settei).toHaveAttribute('target', '_blank');
     expect(settei).toHaveAttribute('rel', 'noopener noreferrer');

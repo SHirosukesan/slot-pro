@@ -63,11 +63,17 @@ export const monkeyTurnV: Machine = {
     benefit: unverifiedText(),
     detection: unverifiedText(),
   },
-  // 外部攻略リンク（該当記事へ直接）。設定推測の中身はアプリに持たない
+  // 外部攻略リンク（該当記事・該当見出しへ直接）。1種類に複数サイト可。設定推測の中身はアプリに持たない
   sourceLinks: [
     { kind: 'settei', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/644/18015/', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/yamasa-slot/198173/#index-14', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'アルテマ', url: 'https://altema.jp/pachimo/lmonkeysisa', referencedAt: '2026-10-17' },
     { kind: 'reset', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/644/18025/', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/yamasa-slot/198173/#index-12', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'アルテマ', url: 'https://altema.jp/pachimo/lmonkeyasaiti', referencedAt: '2026-10-17' },
     { kind: 'advantage', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/644/18028/', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/yamasa-slot/198173/#index-13', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'アルテマ', url: 'https://altema.jp/pachimo/qa-item/36', referencedAt: '2026-10-17' },
   ],
   verifiedAt: null,
   verificationStatus: 'sample',

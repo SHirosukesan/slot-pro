@@ -67,11 +67,17 @@ export const valvrave: Machine = {
     benefit: text('CZ当選'),
     detection: text('液晶の示唆'),
   },
-  // 外部攻略リンク（該当記事へ直接）。設定推測の中身はアプリに持たない
+  // 外部攻略リンク（該当記事・該当見出しへ直接）。1種類に複数サイト可。設定推測の中身はアプリに持たない
   sourceLinks: [
     { kind: 'settei', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/463/12899/', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/sankyo-slot/174976/#index-13', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'アルテマ', url: 'https://altema.jp/pachimo/kakumeikivalvravesisa', referencedAt: '2026-10-17' },
     { kind: 'reset', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/463/12539/', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/sankyo-slot/174976/#index-11', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'アルテマ', url: 'https://altema.jp/pachimo/valvravereset', referencedAt: '2026-10-17' },
     { kind: 'advantage', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/463/25459/', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/sankyo-slot/174976/#index-12', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'アルテマ', url: 'https://altema.jp/pachimo/kakumeikivalvraveyuurikukan', referencedAt: '2026-10-17' },
   ],
   verifiedAt: null,
   verificationStatus: 'sample',

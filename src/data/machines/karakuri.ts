@@ -59,11 +59,16 @@ export const karakuri: Machine = {
     benefit: naText(),
     detection: naText(),
   },
-  // 外部攻略リンク（該当記事へ直接）。設定推測の中身はアプリに持たない
+  // 外部攻略リンク（該当記事・該当見出しへ直接）。1種類に複数サイト可。設定推測の中身はアプリに持たない
   sourceLinks: [
     { kind: 'settei', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/571/15690/', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/sankyo-slot/187795/#index-12', referencedAt: '2026-10-17' },
+    { kind: 'settei', site: 'アルテマ', url: 'https://altema.jp/pachimo/lkarakurisettei', referencedAt: '2026-10-17' },
     { kind: 'reset', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/571/15693/', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/sankyo-slot/187795/#index-10', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'アルテマ', url: 'https://pachimo.altema.jp/lkarakuriasa', referencedAt: '2026-10-17' },
     { kind: 'advantage', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/571/20324/', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'ちょんぼりすた', url: 'https://chonborista.com/slot/sankyo-slot/187795/#index-11', referencedAt: '2026-10-17' },
   ],
   verifiedAt: null,
   verificationStatus: 'sample',

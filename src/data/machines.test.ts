@@ -20,9 +20,15 @@ describe('機種データの形式検証', () => {
   });
   it('外部リンクはサイトのトップページではなく記事URL', () => {
     for (const m of MACHINES)
-      for (const l of m.sourceLinks) if (l.url) expect(new URL(l.url).pathname.split('/').filter(Boolean).length).toBeGreaterThan(1);
+      for (const l of m.sourceLinks) if (l.url) expect(new URL(l.url).pathname.replace(/\/+$/, '').length).toBeGreaterThan(0);
   });
   it('外部リンク3種（設定推測・リセット判別・有利区間）が独立して登録されている', () => {
-    for (const m of MACHINES) expect(m.sourceLinks.map((l) => l.kind).sort()).toEqual(['advantage', 'reset', 'settei']);
+    for (const m of MACHINES) expect([...new Set(m.sourceLinks.map((l) => l.kind))].sort()).toEqual(['advantage', 'reset', 'settei']);
+  });
+  it('同じ項目に同じサイトを重複登録しない', () => {
+    for (const m of MACHINES) {
+      const keys = m.sourceLinks.map((l) => `${l.kind}:${l.site}`);
+      expect(new Set(keys).size).toBe(keys.length);
+    }
   });
 });
