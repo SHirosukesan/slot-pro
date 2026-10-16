@@ -39,12 +39,15 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
   const startKnown = app.netStartKnown[m.machineId] ?? false;
   const remain = remainingNet(adv, net, startKnown);
 
+  /** リセット関連（朝一天井・リセット恩恵・判別）は「据え置き」の時は出さない。リセット・不明なら出す */
+  const resetInfo = reset !== '据え置き';
+
   /** 項目ごとの部品。データが無い機種では null を返して非表示 */
   const blocks: Record<DetailKey, ReactNode> = {
     aim: null, // aim と ev は下の大カードで一緒に表示
     ev: null,
     ceilingNormal: <Tile key="cn" label="通常天井" value={numText(m.ceilingRules.normal)} />,
-    ceilingMorning: <Tile key="cm" label="朝一天井" value={numText(m.ceilingRules.morning)} tone="text-near" />,
+    ceilingMorning: resetInfo ? <Tile key="cm" label="朝一天井" value={numText(m.ceilingRules.morning)} tone="text-near" /> : null,
     quit:
       m.quitRules.length > 0 ? (
         <Tile
@@ -180,8 +183,8 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
             </div>
           </div>
           <dl className="border-t border-line divide-y divide-line text-[15px]">
-            {show('resetBenefit') && <Row icon={<RotateCcw size={18} />} k="リセット恩恵" v={m.morningRules.resetBenefit.text ?? missingText(m.morningRules.resetBenefit.status)} />}
-            {show('resetDetect') && (
+            {resetInfo && show('resetBenefit') && <Row icon={<RotateCcw size={18} />} k="リセット恩恵" v={m.morningRules.resetBenefit.text ?? missingText(m.morningRules.resetBenefit.status)} />}
+            {resetInfo && show('resetDetect') && (
               <Row
                 icon={<Search size={18} />}
                 k={m.morningRules.gakkun.label}
@@ -189,15 +192,16 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
                 tone={m.morningRules.gakkun.certainty === '確定' ? 'text-go' : 'text-near'}
               />
             )}
-            {show('resetDetect') && m.morningRules.initialState && (
+            {resetInfo && show('resetDetect') && m.morningRules.initialState && (
               <Row icon={<Search size={18} />} k={m.morningRules.initialState.label} v={m.morningRules.initialState.certainty} tone="text-near" />
             )}
-            {show('resetDetect') &&
+            {resetInfo &&
+              show('resetDetect') &&
               m.morningRules.otherDetections.map((d) => <Row key={d.label} icon={<Search size={18} />} k={d.label} v={d.certainty} tone="text-near" />)}
             <Row icon={<Flag size={18} />} k="宵越し" v={m.morningRules.carryOver.text ?? missingText(m.morningRules.carryOver.status)} />
-            {m.morningRules.limits.text && <Row icon={<Flag size={18} />} k="判別の限界" v={m.morningRules.limits.text} />}
+ {resetInfo && m.morningRules.limits.text && <Row icon={<Flag size={18} />} k="判別の限界" v={m.morningRules.limits.text} />}
           </dl>
-          {reset !== 'リセット' && morning && (
+          {reset === '不明' && morning && (
             <p className="px-card pb-3 text-[12px] text-dim">「リセット」を選ぶと朝イチ狙い目・朝一天井で判定します。示唆・推測だけでリセット確定にはしません。</p>
           )}
         </section>

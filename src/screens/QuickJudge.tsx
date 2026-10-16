@@ -158,13 +158,21 @@ export function QuickJudge({
               )}
               {morning && (
                 <div className="px-card pb-2.5 -mt-0.5 text-[12px] text-sub flex flex-wrap gap-x-3">
-                  <span>
-                    朝一天井 <b className="num text-near">{numText(m.ceilingRules.morning)}</b>
-                  </span>
-                  <span>
-                    リセット恩恵 <b className="text-fg/90">{m.morningRules.resetBenefit.text ?? missingText(m.morningRules.resetBenefit.status)}</b>
-                  </span>
-                  {reset !== 'リセット' && <span className="text-dim">※リセット時のみ朝イチ狙い目で判定</span>}
+                  {reset === '据え置き' ? (
+                    <span>
+                      宵越し <b className="text-fg/90">{m.morningRules.carryOver.text ?? missingText(m.morningRules.carryOver.status)}</b>
+                    </span>
+                  ) : (
+                    <>
+                      <span>
+                        朝一天井 <b className="num text-near">{numText(m.ceilingRules.morning)}</b>
+                      </span>
+                      <span>
+                        リセット恩恵 <b className="text-fg/90">{m.morningRules.resetBenefit.text ?? missingText(m.morningRules.resetBenefit.status)}</b>
+                      </span>
+                    </>
+                  )}
+                  {reset === '不明' && <span className="text-dim">※リセット時のみ朝イチ狙い目で判定</span>}
                 </div>
               )}
             </li>

@@ -50,6 +50,23 @@ describe('画面', () => {
     expect(screen.queryByText('スルー天井')).not.toBeInTheDocument();
   });
 
+  it('据え置きならリセット関連（朝一天井・リセット恩恵・ガックン）を隠し、リセット・不明なら出す', () => {
+    render(<App />);
+    fireEvent.click(screen.getAllByRole('button', { name: '東京喰種の詳細' })[0]!);
+    const pick = (name: string) => fireEvent.click(screen.getByRole('tab', { name }));
+    pick('不明');
+    expect(screen.getByText('朝一天井')).toBeInTheDocument();
+    expect(screen.getByText('リセット恩恵')).toBeInTheDocument();
+    pick('据え置き');
+    expect(screen.queryByText('朝一天井')).not.toBeInTheDocument();
+    expect(screen.queryByText('リセット恩恵')).not.toBeInTheDocument();
+    expect(screen.queryByText('ガックン')).not.toBeInTheDocument();
+    expect(screen.getByText('宵越し')).toBeInTheDocument();
+    pick('リセット');
+    expect(screen.getByText('朝一天井')).toBeInTheDocument();
+    expect(screen.getByText('ガックン')).toBeInTheDocument();
+  });
+
   it('現在G数を入力すると保存される', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'からくりサーカスの現在G数を入力' }));
