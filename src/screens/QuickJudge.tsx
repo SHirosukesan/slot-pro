@@ -56,7 +56,7 @@ export function QuickJudge({
         <p className="text-sub text-[14px] mt-1">今の状況で狙える台を素早くチェック</p>
       </div>
 
-      <Segmented<Mode> label="表示モード" value={mode} options={['狙い目', '朝イチ', '期待値順']} onChange={onMode} />
+      <Segmented<Mode> label="表示モード" value={mode} options={['朝イチ', '狙い目', '期待値順']} onChange={onMode} />
 
       {/* 天井狙い / CZ狙い の切り替え */}
       <div className="flex items-center gap-3 -mt-1">
