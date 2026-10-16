@@ -6,6 +6,7 @@ import { QuickJudge } from './screens/QuickJudge';
 import { MachineDetail } from './screens/MachineDetail';
 import { Ranking } from './screens/Ranking';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { UserImageContext } from './components/ui';
 
 type Tab = 'quick' | 'rank' | 'settings';
 
@@ -44,6 +45,7 @@ export default function App() {
   ];
 
   return (
+    <UserImageContext.Provider value={app.images}>
     <div className="min-h-full bg-bg">
       <main
         className="mx-auto w-full max-w-[460px] pb-[96px]"
@@ -92,5 +94,6 @@ export default function App() {
         </div>
       </nav>
     </div>
+    </UserImageContext.Provider>
   );
 }

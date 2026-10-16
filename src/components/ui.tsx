@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, Clock3, Flame, HelpCircle, Minus, X } from 'lucide-react';
 import type { Machine, VerificationStatus } from '../types/machine';
 import type { JudgeState } from '../lib/judge';
@@ -11,12 +11,17 @@ export const Logo = ({ className = '' }: { className?: string }) => (
   </span>
 );
 
+/** 利用者が端末で設定した画像（machineId → data URL）。データ側の image.src より優先 */
+export const UserImageContext = createContext<Record<string, string>>({});
+
 /** 機種画像。画像が未登録なら機種IDの色相で代替表示（キャラクター画像は使わない） */
 export const Thumb = ({ m, size = 'var(--thumb)', rounded = 14 }: { m: Machine; size?: string; rounded?: number }) => {
   const [broken, setBroken] = useState(false);
+  const userImages = useContext(UserImageContext);
+  const src = userImages[m.machineId] ?? m.image.src;
   const style = { width: size, height: size, borderRadius: rounded } as const;
-  if (m.image.src && !broken) {
-    return <img src={m.image.src} alt={m.shortName} style={style} className="object-cover shrink-0" onError={() => setBroken(true)} />;
+  if (src && !broken) {
+    return <img src={src} alt={m.shortName} style={style} className="object-cover shrink-0" onError={() => setBroken(true)} />;
   }
   const h = m.hue;
   return (

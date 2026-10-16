@@ -14,6 +14,10 @@ const isEvCondition = (v: unknown): v is EvCondition => {
     typeof o.quitAssumption === 'string' && typeof o.closingConsidered === 'boolean';
 };
 
+const isImageRecord = (v: unknown): v is Record<string, string> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v) &&
+  Object.values(v).every((x) => typeof x === 'string' && x.startsWith('data:image/'));
+
 const isBoolRecord = (v: unknown): v is Record<string, boolean> =>
   typeof v === 'object' && v !== null && !Array.isArray(v) && Object.values(v).every((x) => typeof x === 'boolean');
 
@@ -34,6 +38,17 @@ export function useAppState() {
   const [nets, setNets] = usePersisted<Record<string, number>>('nets', {}, isNumberRecord);
   const [netStartKnown, setNetStartKnown] = usePersisted<Record<string, boolean>>('netStart', {}, isBoolRecord);
   const [evBase, setEvBase] = usePersisted<EvCondition>('evBase', SAMPLE_EV_CONDITION, isEvCondition);
+
+  /** 利用者が設定した機種画像（端末内のみ） */
+  const [images, setImages] = usePersisted<Record<string, string>>('images', {}, isImageRecord);
+  const setImage = useCallback((id: string, dataUrl: string | null) => {
+    setImages((prev) => {
+      const next = { ...prev };
+      if (dataUrl == null) delete next[id];
+      else next[id] = dataUrl;
+      return next;
+    });
+  }, [setImages]);
 
   const setCounter = useCallback((id: string, v: number | null) => {
     setCounters((prev) => {
@@ -68,6 +83,7 @@ export function useAppState() {
     nets, setNet,
     netStartKnown, setStartKnown,
     evBase, setEvBase,
+    images, setImage,
   };
 }
 

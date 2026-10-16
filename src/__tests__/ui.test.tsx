@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import App from '../App';
-import { Thumb } from '../components/ui';
+import { Thumb, UserImageContext } from '../components/ui';
 import { tokyoGhoul } from '../data/machines/tokyoGhoul';
 
 describe('画面', () => {
@@ -9,6 +9,22 @@ describe('画面', () => {
   it('画像がない機種は代替表示', () => {
     render(<Thumb m={tokyoGhoul} />);
     expect(screen.getByTestId('thumb-fallback')).toBeInTheDocument();
+  });
+
+  it('端末で設定した画像があれば代替表示より優先', () => {
+    render(
+      <UserImageContext.Provider value={{ [tokyoGhoul.machineId]: 'data:image/png;base64,AAAA' }}>
+        <Thumb m={tokyoGhoul} />
+      </UserImageContext.Provider>,
+    );
+    expect(screen.queryByTestId('thumb-fallback')).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '東京喰種' })).toHaveAttribute('src', 'data:image/png;base64,AAAA');
+  });
+
+  it('機種詳細に画像設定ボタンがある', () => {
+    render(<App />);
+    fireEvent.click(screen.getAllByRole('button', { name: '東京喰種の詳細' })[0]!);
+    expect(screen.getByLabelText('東京喰種の画像を設定')).toBeInTheDocument();
   });
 
   it('クイック判定に5機種が出て、検索で絞り込める', () => {

@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import {
   BarChart3,
+  Camera,
   ChevronLeft,
   ExternalLink,
   FileText,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { ExternalLink as XLink, Machine, ResetState } from '../types/machine';
 import { judge } from '../lib/judge';
+import { fileToThumb, isImageFile } from '../lib/image';
 import { remainingNet } from '../lib/advantage';
 import { fmtCheckCount, fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
 import { DETAIL_ORDER, type DetailKey } from '../config/ui';
@@ -102,7 +104,7 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
               <h1 className="text-[32px] font-black leading-tight tracking-tight">{m.shortName}</h1>
               <p className="text-[14px] text-fg/80">{m.officialName}</p>
             </div>
-            <Thumb m={m} size="84px" />
+            <ImagePicker m={m} app={app} />
           </div>
         </div>
       </div>
@@ -316,6 +318,46 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
         allowNegative
         onSave={(v) => app.setNet(m.machineId, v)}
       />
+    </div>
+  );
+}
+
+function ImagePicker({ m, app }: { m: Machine; app: AppState }) {
+  const [error, setError] = useState<string | null>(null);
+  const has = app.images[m.machineId] != null;
+  const inputId = `image-${m.machineId}`;
+  return (
+    <div className="flex flex-col items-center gap-1 shrink-0">
+      <label htmlFor={inputId} className="relative cursor-pointer" aria-label={`${m.shortName}の画像を${has ? '変更' : '設定'}`}>
+        <Thumb m={m} size="84px" />
+        <span className="absolute -bottom-1.5 -right-1.5 size-8 grid place-items-center rounded-full bg-accent text-white border-2 border-bg">
+          <Camera size={16} aria-hidden />
+        </span>
+      </label>
+      <input
+        id={inputId}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={async (e) => {
+          const f = e.target.files?.[0];
+          e.target.value = '';
+          if (!f) return;
+          if (!isImageFile(f)) return setError('画像ファイルを選んでください');
+          try {
+            app.setImage(m.machineId, await fileToThumb(f));
+            setError(null);
+          } catch (err) {
+            setError(err instanceof Error ? err.message : '画像を設定できませんでした');
+          }
+        }}
+      />
+      {has && (
+        <button onClick={() => app.setImage(m.machineId, null)} className="text-[11px] text-sub underline mt-1">
+          画像を外す
+        </button>
+      )}
+      {error && <span className="text-[11px] text-prio max-w-[110px] text-center">{error}</span>}
     </div>
   );
 }

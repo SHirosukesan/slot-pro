@@ -53,7 +53,7 @@ export function SettingsScreen({ app, onBack }: { app: AppState; onBack: () => v
               <Thumb m={m} size="36px" rounded={8} />
               <div className="min-w-0 flex-1">
                 <div className="text-[14px] font-bold truncate">{m.officialName}</div>
-                <div className="text-[11px] text-dim truncate">{m.machineId}・画像 {m.image.src ? m.image.license : '未登録'}</div>
+                <div className="text-[11px] text-dim truncate">{m.machineId}・画像 {app.images[m.machineId] ? '端末で設定済み' : m.image.src ? m.image.license : '未登録'}</div>
               </div>
               <span className="text-[11px] text-sub">{STATUS_LABEL[m.verificationStatus]}</span>
             </li>
@@ -78,12 +78,13 @@ export function SettingsScreen({ app, onBack }: { app: AppState; onBack: () => v
         <p>Android：Chrome のメニュー →「アプリをインストール」</p>
         <p>PC：Chrome・Edge のアドレスバー右のインストールボタン</p>
         <p className="text-dim mt-1">機種情報はオフラインでも表示できます。外部攻略サイトは通信が必要です。</p>
+        <p className="text-dim mt-1">機種画像は詳細画面の画像をタップして設定します。画像はこの端末の中だけに保存され、外部には送られません。</p>
       </section>
 
       <section className="card p-card">
         {confirming ? (
           <div className="flex flex-col gap-2">
-            <p className="text-[14px]">入力した G数・お気に入り・リセット状態をすべて消します。</p>
+            <p className="text-[14px]">入力した G数・お気に入り・リセット状態・設定した画像をすべて消します。</p>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => setConfirming(false)} className="rounded-[12px] border border-line py-3 font-bold text-sub">やめる</button>
               <button
