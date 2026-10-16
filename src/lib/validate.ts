@@ -22,7 +22,8 @@ export const dataWarnings = (m: Machine): DataWarning[] => {
   const normal = m.ceilingRules.normal.value;
   const morning = m.ceilingRules.morning.value;
 
-  if (normal != null && m.ceilingRules.normal.unit === 'G' && normal >= 2000) add('ceilingRules.normal', `通常天井 ${normal}G は桁の誤入力の可能性`);
+  // 実機には 2,500G 天井（からくりサーカスのAT間）もあるので、桁違いを疑うのは 3,000G 以上
+  if (normal != null && m.ceilingRules.normal.unit === 'G' && normal >= 3000) add('ceilingRules.normal', `通常天井 ${normal}G は桁の誤入力の可能性`);
   if (normal != null && morning != null && morning > normal) add('ceilingRules.morning', '朝一天井が通常天井より深い');
   for (const r of [...m.entryRules, ...(m.morningRules.entry ? [m.morningRules.entry] : [])]) {
     if (r.minLine != null && normal != null && r.unit === m.ceilingRules.normal.unit && r.minLine > normal) add(`entry.${r.id}`, '狙い目が天井より深い');

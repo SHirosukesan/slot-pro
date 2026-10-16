@@ -1,7 +1,12 @@
 import type { Machine } from '../../types/machine';
-import { SAMPLE_EV_CONDITION as EV, detect, num, text } from '../helpers';
+import { SAMPLE_EV_CONDITION as EV, detect, num, sourcedNum, src, text } from '../helpers';
 
-/** ※数値はすべて STEP1 の表示サンプル（架空）。実機値ではない */
+/**
+ * 天井（通常・朝一・CZ）とスルー天井は攻略サイト2つで照合した値（2026-10-17）。
+ * それ以外（狙い目・期待値・やめどき等）はまだ STEP1 の表示サンプル（架空）。
+ */
+const CH_vv = src('ちょんぼりすた', 'https://chonborista.com/slot/sankyo-slot/174976/');
+const AL_vv = src('アルテマ', 'https://altema.jp/pachimo/valvravetenjo');
 export const valvrave: Machine = {
   machineId: 'slot.smart.valvrave.v1',
   officialName: 'スマスロ 革命機ヴァルヴレイヴ',
@@ -30,7 +35,7 @@ export const valvrave: Machine = {
       id: 'cz',
       aim: 'CZ',
       condition: '通常',
-      unit: 'G',
+      unit: '液晶G',
       minLine: 200,
       recommended: { min: 200, max: 300 },
       ev: { min: 800, max: 2000, condition: EV },
@@ -41,7 +46,7 @@ export const valvrave: Machine = {
       id: 'cz-morning',
       aim: 'CZ',
       condition: '朝イチ',
-      unit: 'G',
+      unit: '液晶G',
       minLine: 0,
       recommended: { min: 0, max: 150 },
       ev: { min: 300, max: 900, condition: EV },
@@ -50,10 +55,10 @@ export const valvrave: Machine = {
     },
   ],
   ceilingRules: {
-    cz: num(400, 'G'),
-    czMorning: num(200, 'G'),
-    normal: num(1000, 'G'),
-    morning: num(600, 'G'),
+    normal: sourcedNum(1500, 'G', [CH_vv, AL_vv], 'AT・ボーナス間の実ゲーム数。恩恵はボーナス（AT確定ではない）。+α'),
+    morning: sourcedNum(null, 'G', [CH_vv, AL_vv], 'リセット時の天井短縮なし', 'na'),
+    cz: sourcedNum(1000, '液晶G', [CH_vv, AL_vv], '液晶表示のG数。モードで短い。+α'),
+    czMorning: sourcedNum(null, '液晶G', [CH_vv, AL_vv], 'リセット時のCZ天井短縮なし', 'na'),
   },
   quitRules: [
     { id: 'after-at', situation: 'AT後', checkCount: 0, unit: 'G', action: '即ヤメ', status: 'sample', sources: [] },
@@ -61,8 +66,8 @@ export const valvrave: Machine = {
   precursorRules: null,
   zoneRules: [],
   skipRules: {
-    definition: 'CZ失敗回数（サンプル定義）',
-    ceiling: num(6, '回'),
+    definition: 'AT間のCZ連続失敗回数',
+    ceiling: sourcedNum(7, '回', [CH_vv, AL_vv], '7連続失敗で次のCZが成功（ボーナス）'),
     aimFrom: num(4, '回'),
   },
   morningRules: {

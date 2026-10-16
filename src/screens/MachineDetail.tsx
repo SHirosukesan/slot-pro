@@ -18,7 +18,7 @@ import type { AimType, ExternalLink as XLink, Machine, ResetState } from '../typ
 import { counterKey, counterName, hasAim, judge } from '../lib/judge';
 import { fileToThumb, isImageFile } from '../lib/image';
 import { remainingNet } from '../lib/advantage';
-import { fmtCheckCount, fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
+import { fmtCheckCount, fmtEvRange, fmtNum, fmtRange, missingText, numText, unitText } from '../lib/format';
 import { DETAIL_ORDER, type DetailKey } from '../config/ui';
 import type { AppState } from '../state/useAppState';
 import { MachineArt, hasArt } from '../components/art';
@@ -98,7 +98,14 @@ export function MachineDetail({
       m.zoneRules.length > 0 ? (
         <Tile key="z" label={m.zoneRules[0]!.label} value={m.zoneRules.map((z) => fmtRange(z.min, z.max, z.unit)).join(' / ')} />
       ) : null,
-    skipCeiling: m.skipRules ? <Tile key="sc" label="スルー天井" value={numText(m.skipRules.ceiling)} sub={m.skipRules.definition} /> : null,
+    skipCeiling: m.skipRules ? (
+      <Tile
+        key="sc"
+        label="スルー天井"
+        value={numText(m.skipRules.ceiling)}
+        sub={`${m.ceilingRules && m.skipRules.ceiling.status === 'needsReview' ? '【要確認】' : ''}${m.skipRules.definition}`}
+      />
+    ) : null,
     skipAim: m.skipRules ? <Tile key="sa" label="スルー狙い目" value={m.skipRules.aimFrom.value == null ? '未確認' : `${m.skipRules.aimFrom.value}${m.skipRules.aimFrom.unit}〜`} tone="text-go" /> : null,
     resetBenefit: null,
     resetDetect: null,
@@ -163,14 +170,14 @@ export function MachineDetail({
             <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-detail-big)' }}>
               {cur == null ? '---' : fmtNum(cur)}
             </span>
-            <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{j.unit}</span>
+            <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{unitText(j.unit)}</span>
             <Pencil size={16} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
           </button>
           {j.distance != null && (
             <div className="mt-2 text-[14px] text-sub">
               {ceilName}まで{' '}
               <b className={`num text-[18px] ${j.distance === 0 ? 'text-prio' : 'text-fg'}`}>
-                {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${j.ceiling?.unit ?? ''}`}
+                {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${unitText(j.ceiling?.unit ?? '')}`}
               </b>
             </div>
           )}
@@ -182,7 +189,7 @@ export function MachineDetail({
               <Stat
                 label={`${j.morningApplied ? '朝イチ' : ''}${aim === 'CZ' ? 'CZ' : ''}狙い目`}
                 icon={<Target size={15} className="text-prio" aria-hidden />}
-                value={rule?.minLine != null ? `${fmtNum(rule.minLine)}${rule.unit}〜` : '未確認'}
+                value={rule?.minLine != null ? `${fmtNum(rule.minLine)}${unitText(rule.unit)}〜` : '未確認'}
               />
               <Stat
                 label="推奨範囲"
@@ -353,7 +360,7 @@ export function MachineDetail({
 
       <p className="text-[12px] text-dim leading-relaxed mt-1">
         {m.verificationStatus === 'sample'
-          ? '数値はすべて架空の表示サンプルです。実機の解析値ではありません。STEP 2 で出典を確認して差し替えます。'
+          ? '天井（通常・朝一・CZ）は攻略サイト2つで照合済み（2026-10-17）。狙い目・期待値・やめどき等はまだ架空の表示サンプルです。'
           : `確認日：${m.verifiedAt ?? '未確認'}`}
       </p>
 
@@ -361,7 +368,7 @@ export function MachineDetail({
         open={sheet === 'count'}
         onClose={() => setSheet(null)}
         title={`現在の${aim === 'CZ' && !morning ? 'CZ' : ''}${counterName(j.unit)}`}
-        unit={j.unit}
+        unit={unitText(j.unit)}
         value={cur}
         onSave={(v) => app.setCounter(key, v)}
       />

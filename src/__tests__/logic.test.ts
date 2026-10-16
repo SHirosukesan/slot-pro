@@ -2,7 +2,7 @@ import { MACHINES, machineById } from '../data/machines';
 import { tokyoGhoul } from '../data/machines/tokyoGhoul';
 import { searchMachines } from '../lib/search';
 import { counterKey, counterName, distanceTo, hasAim, judge } from '../lib/judge';
-import { fmtCheckCount, fmtEvRange, fmtRange, numText } from '../lib/format';
+import { fmtCheckCount, fmtEvRange, fmtRange, numText, unitText } from '../lib/format';
 import { remainingNet } from '../lib/advantage';
 import { rankSlots } from '../lib/ranking';
 import { SAMPLE_SLOTS } from '../data/sampleSlots';
@@ -33,15 +33,17 @@ describe('通常天井と朝一天井の区別', () => {
   it('リセット時だけ朝一天井・朝イチ狙い目を使う', () => {
     const r = judge(tokyoGhoul, 100, true, 'リセット');
     expect(r.morningApplied).toBe(true);
-    expect(r.ceiling?.value).toBe(650);
+    // 東京喰種はリセットでもAT天井は短縮なし → 通常の1200G
+    expect(r.ceiling?.value).toBe(1200);
     expect(r.state).toBe('go');
+    // 北斗はリセット（設定変更）で800Gに短縮
+    expect(judge(machineById('slot.smart.hokuto-no-ken.v1')!, 100, true, 'リセット').ceiling?.value).toBe(800);
   });
   it('朝イチでも不明・据え置きはリセット扱いしない', () => {
     for (const s of ['不明', '据え置き'] as const) {
-      const r = judge(tokyoGhoul, 100, true, s);
+      const r = judge(machineById('slot.smart.hokuto-no-ken.v1')!, 100, true, s);
       expect(r.morningApplied).toBe(false);
-      expect(r.ceiling?.value).toBe(999);
-      expect(r.state).toBe('skip');
+      expect(r.ceiling?.value).toBe(1268);
     }
   });
   it('判定区分', () => {
@@ -58,13 +60,13 @@ describe('通常天井と朝一天井の区別', () => {
 });
 
 describe('機種ごとの数え方の単位', () => {
-  it('東京喰種は喰、北斗はあべし、それ以外はG', () => {
-    expect(judge(tokyoGhoul, 600, false, '不明').unit).toBe('喰');
-    expect(judge(machineById('slot.smart.hokuto-no-ken.v1')!, 600, false, '不明').unit).toBe('あべし');
-    expect(judge(machineById('slot.smart.valvrave.v1')!, 600, false, '不明').unit).toBe('G');
+  it('天井狙いは5機種ともG（攻略サイト2つで確認。喰・あべしではない）', () => {
+    for (const m of MACHINES) expect(judge(m, 600, false, '不明').unit).toBe('G');
   });
-  it('CZ狙いはCZの単位（東京喰種のCZはG）', () => {
-    expect(judge(tokyoGhoul, 100, false, '不明', 'CZ').unit).toBe('G');
+  it('CZ天井は液晶のG数で数える', () => {
+    expect(judge(tokyoGhoul, 100, false, '不明', 'CZ').unit).toBe('液晶G');
+    expect(counterName('液晶G')).toBe('液晶ゲーム数');
+    expect(unitText('液晶G')).toBe('G');
   });
   it('呼び名: G→ゲーム数、それ以外は単位そのまま', () => {
     expect(counterName('G')).toBe('ゲーム数');
@@ -81,25 +83,25 @@ describe('天井狙いとCZ狙い', () => {
   it('CZ狙いはCZの狙い目・CZ天井で判定し、残りGを出す', () => {
     const r = judge(tokyoGhoul, 200, false, '不明', 'CZ');
     expect(r.rule?.aim).toBe('CZ');
-    expect(r.ceiling?.value).toBe(300);
-    expect(r.distance).toBe(100);
+    expect(r.ceiling?.value).toBe(600);
+    expect(r.distance).toBe(400);
     expect(r.state).toBe('go');
   });
   it('朝イチ・リセットのCZ狙いは朝一CZ天井まで', () => {
     const r = judge(tokyoGhoul, 40, true, 'リセット', 'CZ');
-    expect(r.ceiling?.value).toBe(150);
-    expect(r.distance).toBe(110);
+    expect(r.ceiling?.value).toBe(200);
+    expect(r.distance).toBe(160);
   });
   it('朝一CZ天井が無い機種はリセットでも通常のCZ天井', () => {
     const k = machineById('slot.smart.karakuri-circus.v1')!;
-    expect(judge(k, 100, true, 'リセット', 'CZ').ceiling?.value).toBe(300);
+    expect(judge(k, 100, true, 'リセット', 'CZ').ceiling?.value).toBe(1200);
   });
   it('CZの仕組みが無い機種はCZ狙いの対象外', () => {
     expect(hasAim(machineById('slot.smart.hokuto-no-ken.v1')!, 'CZ')).toBe(false);
     expect(hasAim(tokyoGhoul, 'CZ')).toBe(true);
   });
   it('天井を超えていたら残り0（到達）', () => {
-    expect(judge(tokyoGhoul, 1200, false, '不明', '天井').distance).toBe(0);
+    expect(judge(tokyoGhoul, 1300, false, '不明', '天井').distance).toBe(0);
   });
   it('天井狙いとCZ狙いはG数を別々に保存、朝イチは共通', () => {
     expect(counterKey('a', '天井', false)).toBe('a');
@@ -210,11 +212,32 @@ describe('データ検証', () => {
   it('確認済みなのに出典が足りないと警告', () => {
     const m = clone(tokyoGhoul);
     m.ceilingRules.normal.status = 'verified';
+    m.ceilingRules.normal.sources = m.ceilingRules.normal.sources.slice(0, 1);
     expect(dataWarnings(m).some((w) => w.message.includes('出典'))).toBe(true);
   });
   it('出典URLにトップページ以外の形式不正URLは不可', () => {
     const m = clone(tokyoGhoul);
     m.sourceLinks[0] = { kind: 'settei', site: 'x', url: 'not-a-url' };
     expect(schemaErrors(m).length).toBeGreaterThan(0);
+  });
+});
+
+describe('攻略サイトで照合した天井', () => {
+  const by = (id: string) => machineById(id)!;
+  it('数値（+αは省略）', () => {
+    expect(by('slot.smart.tokyo-ghoul.v1').ceilingRules.cz?.value).toBe(600);
+    expect(by('slot.smart.hokuto-no-ken.v1').ceilingRules.normal.value).toBe(1268);
+    expect(by('slot.smart.karakuri-circus.v1').ceilingRules.normal.value).toBe(2500);
+    expect(by('slot.smart.valvrave.v1').ceilingRules.cz?.value).toBe(1000);
+    expect(by('slot.smart.monkey-turn-v.v1').ceilingRules.morning.value).toBe(495);
+  });
+  it('照合済みの値は出典が2件以上', () => {
+    for (const m of MACHINES)
+      for (const v of [m.ceilingRules.normal, m.ceilingRules.morning, m.ceilingRules.cz, m.ceilingRules.czMorning])
+        if (v && v.status === 'verified') expect(v.sources.length).toBeGreaterThanOrEqual(2);
+  });
+  it('食い違い・出典1件の値は確認待ち', () => {
+    expect(by('slot.smart.karakuri-circus.v1').skipRules?.ceiling.status).toBe('needsReview');
+    expect(by('slot.smart.monkey-turn-v.v1').skipRules?.ceiling.status).toBe('needsReview');
   });
 });

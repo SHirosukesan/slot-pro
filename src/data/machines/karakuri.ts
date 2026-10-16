@@ -1,7 +1,12 @@
 import type { Machine } from '../../types/machine';
-import { SAMPLE_EV_CONDITION as EV, detect, naText, num, text } from '../helpers';
+import { SAMPLE_EV_CONDITION as EV, detect, naText, num, sourcedNum, src, text } from '../helpers';
 
-/** ※数値はすべて STEP1 の表示サンプル（架空）。実機値ではない */
+/**
+ * 天井（通常・朝一・CZ）とスルー天井は攻略サイト2つで照合した値（2026-10-17）。
+ * それ以外（狙い目・期待値・やめどき等）はまだ STEP1 の表示サンプル（架空）。
+ */
+const CH_kr = src('ちょんぼりすた', 'https://chonborista.com/slot/sankyo-slot/187795/');
+const AL_kr = src('アルテマ', 'https://altema.jp/pachimo/lkarakuritenjo');
 export const karakuri: Machine = {
   machineId: 'slot.smart.karakuri-circus.v1',
   officialName: 'Lからくりサーカス',
@@ -30,7 +35,7 @@ export const karakuri: Machine = {
       id: 'cz',
       aim: 'CZ',
       condition: '通常',
-      unit: 'G',
+      unit: '液晶G',
       minLine: 150,
       recommended: { min: 150, max: 250 },
       ev: null,
@@ -39,10 +44,10 @@ export const karakuri: Machine = {
     },
   ],
   ceilingRules: {
-    cz: num(300, 'G'),
-    czMorning: num(null, 'G', 'na'),
-    normal: num(800, 'G'),
-    morning: num(null, 'G', 'na'),
+    normal: sourcedNum(2500, 'G', [CH_kr, AL_kr], 'AT間の実ゲーム数'),
+    morning: sourcedNum(null, 'G', [CH_kr, AL_kr], 'リセット時の天井短縮なし', 'na'),
+    cz: sourcedNum(1200, '液晶G', [CH_kr, AL_kr], '液晶表示のG数（ゲーム数加算あり）'),
+    czMorning: sourcedNum(null, '液晶G', [CH_kr, AL_kr], 'リセット時のCZ天井短縮なし', 'na'),
   },
   quitRules: [
     { id: 'after-at', situation: 'AT後', checkCount: 50, unit: 'G', action: 'ゾーン抜けまで', status: 'sample', sources: [] },
@@ -56,7 +61,11 @@ export const karakuri: Machine = {
     sources: [],
   },
   zoneRules: [{ id: 'z1', label: 'ゾーン', min: 200, max: 250, unit: 'G', status: 'sample', sources: [] }],
-  skipRules: null,
+  skipRules: {
+    definition: 'AT間のCZ「機械仕掛けの神」の失敗回数（幕間チャンスは数えない）',
+    ceiling: sourcedNum(4, '回', [CH_kr, AL_kr], '4スルー後、次のCZでAT。サイトで4回/5回の書き方が食い違うため確認待ち', 'needsReview'),
+    aimFrom: num(3, '回'),
+  },
   morningRules: {
     entry: null,
     resetBenefit: naText(),

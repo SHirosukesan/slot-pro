@@ -4,7 +4,7 @@ import type { AimType, Machine, ResetState, Unit } from '../types/machine';
 import { MACHINES } from '../data/machines';
 import { searchMachines } from '../lib/search';
 import { counterKey, counterName, distanceTo, hasAim, judge, pickCeiling } from '../lib/judge';
-import { fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
+import { fmtEvRange, fmtNum, fmtRange, missingText, numText, unitText } from '../lib/format';
 import { LIST_ITEMS } from '../config/ui';
 import type { AppState } from '../state/useAppState';
 import { Logo, NumberSheet, Segmented, StatePill, Thumb, stateText } from '../components/ui';
@@ -129,7 +129,7 @@ export function QuickJudge({
                     <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-big)' }}>
                       {cur == null ? '---' : fmtNum(cur)}
                     </span>
-                    <span className={`num text-[22px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{j.unit}</span>
+                    <span className={`num text-[22px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{unitText(j.unit)}</span>
                     <Pencil size={15} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
                   </button>
 
@@ -139,13 +139,13 @@ export function QuickJudge({
                         <Target size={16} className={showCeiling ? 'text-prio' : 'text-prio/80'} aria-hidden />
                         {showCeiling ? (
                           <span className="font-bold text-prio">
-                            {ceilName} <span className="num">{fmtNum(ceil)}{j.ceiling?.unit}</span>
+                            {ceilName} <span className="num">{fmtNum(ceil)}{unitText(j.ceiling?.unit ?? '')}</span>
                           </span>
                         ) : (
                           <span className="text-fg/90">
                             {aimName}{' '}
                             <span className="num font-bold">
-                              {j.rule?.minLine != null ? `${fmtNum(j.rule.minLine)}${j.rule.unit}〜` : '未確認'}
+                              {j.rule?.minLine != null ? `${fmtNum(j.rule.minLine)}${unitText(j.rule.unit)}〜` : '未確認'}
                             </span>
                           </span>
                         )}
@@ -168,7 +168,7 @@ export function QuickJudge({
                       <div className="text-sub">
                         {ceilName}まで{' '}
                         <span className={`num font-bold ${j.distance === 0 ? 'text-prio' : 'text-fg'}`}>
-                          {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${j.ceiling?.unit ?? ''}`}
+                          {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${unitText(j.ceiling?.unit ?? '')}`}
                         </span>
                       </div>
                     )}
@@ -225,7 +225,7 @@ export function QuickJudge({
         open={editing != null}
         onClose={() => setEditing(null)}
         title={editing ? `${editing.m.shortName} 現在の${editing.key.endsWith('#cz') ? 'CZ' : ''}${counterName(editing.unit)}` : ''}
-        unit={editing?.unit ?? 'G'}
+        unit={unitText(editing?.unit ?? 'G')}
         value={editing ? (app.counters[editing.key] ?? null) : null}
         onSave={(v) => editing && app.setCounter(editing.key, v)}
       />

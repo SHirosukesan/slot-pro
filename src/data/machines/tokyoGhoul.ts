@@ -1,7 +1,12 @@
 import type { Machine } from '../../types/machine';
-import { SAMPLE_EV_CONDITION as EV, detect, num, text } from '../helpers';
+import { SAMPLE_EV_CONDITION as EV, detect, num, sourcedNum, src, text } from '../helpers';
 
-/** ※数値はすべて STEP1 の表示サンプル（架空）。実機値ではない */
+/**
+ * 天井（通常・朝一・CZ）とスルー天井は攻略サイト2つで照合した値（2026-10-17）。
+ * それ以外（狙い目・期待値・やめどき等）はまだ STEP1 の表示サンプル（架空）。
+ */
+const CH_tg = src('ちょんぼりすた', 'https://chonborista.com/slot/spiky/226073/#index-5');
+const AL_tg = src('アルテマ', 'https://pachimo.altema.jp/ltokyoghoultenjo');
 export const tokyoGhoul: Machine = {
   machineId: 'slot.smart.tokyo-ghoul.v1',
   officialName: 'スマスロ 東京喰種',
@@ -13,17 +18,17 @@ export const tokyoGhoul: Machine = {
   manufacturer: null,
   image: { src: null, credit: null, license: '未確認' },
   hue: 352,
-  counterUnit: '喰',
+  counterUnit: 'G',
   entryRules: [
     {
       id: 'normal',
       aim: '天井',
       condition: '通常',
-      unit: '喰',
+      unit: 'G',
       minLine: 550,
       recommended: { min: 550, max: 650 },
       ev: { min: 6000, max: 10000, condition: EV },
-      target: '液晶の喰カウンター',
+      target: 'メニュー画面のAT間G数',
       status: 'sample',
       sources: [],
     },
@@ -31,7 +36,7 @@ export const tokyoGhoul: Machine = {
       id: 'cz',
       aim: 'CZ',
       condition: '通常',
-      unit: 'G',
+      unit: '液晶G',
       minLine: 150,
       recommended: { min: 150, max: 250 },
       ev: { min: 1500, max: 3000, condition: EV },
@@ -42,7 +47,7 @@ export const tokyoGhoul: Machine = {
       id: 'cz-morning',
       aim: 'CZ',
       condition: '朝イチ',
-      unit: 'G',
+      unit: '液晶G',
       minLine: 0,
       recommended: { min: 0, max: 100 },
       ev: null,
@@ -51,10 +56,10 @@ export const tokyoGhoul: Machine = {
     },
   ],
   ceilingRules: {
-    cz: num(300, 'G'),
-    czMorning: num(150, 'G'),
-    normal: num(999, '喰'),
-    morning: num(650, '喰'),
+    normal: sourcedNum(1200, 'G', [CH_tg, AL_tg], 'AT間のG数（メニュー画面で確認）。+α'),
+    morning: sourcedNum(null, 'G', [CH_tg, AL_tg], 'リセット時に短縮されるのはCZ天井のみ', 'na'),
+    cz: sourcedNum(600, '液晶G', [CH_tg, AL_tg], '液晶右下のG数（スイカ加算込み）。モードにより短い。+α'),
+    czMorning: sourcedNum(200, '液晶G', [CH_tg, AL_tg], '設定変更時。+α'),
     benefit: text('AT当選'),
   },
   quitRules: [
@@ -78,7 +83,7 @@ export const tokyoGhoul: Machine = {
       id: 'morning',
       aim: '天井',
       condition: '朝イチ',
-      unit: '喰',
+      unit: 'G',
       minLine: 0,
       recommended: { min: 0, max: 200 },
       ev: null,

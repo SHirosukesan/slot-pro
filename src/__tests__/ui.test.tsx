@@ -33,7 +33,7 @@ describe('画面', () => {
   it('クイック判定に5機種が出て、検索で絞り込める', () => {
     render(<App />);
     expect(screen.getByText('東京喰種')).toBeInTheDocument();
-    expect(screen.getByText('550〜650喰')).toBeInTheDocument();
+    expect(screen.getByText('550〜650G')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('機種名で検索'), { target: { value: 'ほくと' } });
     expect(screen.queryByText('東京喰種')).not.toBeInTheDocument();
     expect(screen.getByText('北斗')).toBeInTheDocument();

@@ -1,5 +1,6 @@
 import type {
   Certainty,
+  SourceRef,
   Detection,
   EvCondition,
   NumValue,
@@ -57,3 +58,19 @@ export const SAMPLE_EV_CONDITION: EvCondition = {
   quitAssumption: '機種別やめどき',
   closingConsidered: false,
 };
+
+/** 出典の記録 */
+export const src = (site: string, url: string, referencedAt = '2026-10-17'): SourceRef => ({ site, url, referencedAt });
+
+/**
+ * 出典つきの数値。出典が2件以上で一致したら verified、1件なら needsReview（確認待ち）。
+ * 食い違いがある時は status を明示して渡す。
+ */
+export const sourcedNum = (value: number | null, unit: Unit, sources: SourceRef[], note?: string, status?: VerificationStatus): NumValue => ({
+  value,
+  unit,
+  status: status ?? (sources.length >= 2 ? 'verified' : 'needsReview'),
+  sources,
+  checkedAt: '2026-10-17',
+  ...(note ? { note } : {}),
+});

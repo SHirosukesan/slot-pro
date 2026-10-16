@@ -1,7 +1,12 @@
 import type { Machine } from '../../types/machine';
-import { SAMPLE_EV_CONDITION as EV, detect, num, text } from '../helpers';
+import { SAMPLE_EV_CONDITION as EV, detect, num, sourcedNum, src, text } from '../helpers';
 
-/** ※数値はすべて STEP1 の表示サンプル（架空）。実機値ではない */
+/**
+ * 天井（通常・朝一・CZ）とスルー天井は攻略サイト2つで照合した値（2026-10-17）。
+ * それ以外（狙い目・期待値・やめどき等）はまだ STEP1 の表示サンプル（架空）。
+ */
+const CH_hk = src('ちょんぼりすた', 'https://chonborista.com/slot/sammy-slot/181626/');
+const AL_hk = src('アルテマ', 'https://altema.jp/pachimo/lhokutotenjo');
 export const hokuto: Machine = {
   machineId: 'slot.smart.hokuto-no-ken.v1',
   officialName: 'スマスロ 北斗の拳',
@@ -13,13 +18,13 @@ export const hokuto: Machine = {
   manufacturer: null,
   image: { src: null, credit: null, license: '未確認' },
   hue: 28,
-  counterUnit: 'あべし',
+  counterUnit: 'G',
   entryRules: [
     {
       id: 'normal',
       aim: '天井',
       condition: '通常',
-      unit: 'あべし',
+      unit: 'G',
       minLine: 600,
       recommended: { min: 600, max: 800 },
       ev: { min: 3000, max: 9000, condition: EV },
@@ -28,8 +33,8 @@ export const hokuto: Machine = {
     },
   ],
   ceilingRules: {
-    normal: num(1268, 'あべし'),
-    morning: num(null, 'あべし', 'unverified'),
+    normal: sourcedNum(1268, 'G', [CH_hk, AL_hk], '+α'),
+    morning: sourcedNum(800, 'G', [CH_hk, AL_hk], '設定変更時のみ短縮。+α'),
     benefit: text('ボーナス当選'),
   },
   quitRules: [

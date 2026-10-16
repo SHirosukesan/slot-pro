@@ -1,7 +1,12 @@
 import type { Machine } from '../../types/machine';
-import { SAMPLE_EV_CONDITION as EV, detect, num, text, unverifiedText } from '../helpers';
+import { SAMPLE_EV_CONDITION as EV, detect, num, sourcedNum, src, text, unverifiedText } from '../helpers';
 
-/** ※数値はすべて STEP1 の表示サンプル（架空）。実機値ではない */
+/**
+ * 天井（通常・朝一・CZ）とスルー天井は攻略サイト2つで照合した値（2026-10-17）。
+ * それ以外（狙い目・期待値・やめどき等）はまだ STEP1 の表示サンプル（架空）。
+ */
+const CH_mk = src('ちょんぼりすた', 'https://chonborista.com/slot/yamasa-slot/198173/');
+const AL_mk = src('アルテマ', 'https://altema.jp/pachimo/lmonkey');
 export const monkeyTurnV: Machine = {
   machineId: 'slot.smart.monkey-turn-v.v1',
   officialName: 'スマスロ モンキーターンV',
@@ -28,8 +33,8 @@ export const monkeyTurnV: Machine = {
     },
   ],
   ceilingRules: {
-    normal: num(795, 'G'),
-    morning: num(495, 'G'),
+    normal: sourcedNum(795, 'G', [CH_mk, AL_mk], '+α。ほかに周期天井（最大6周期）あり'),
+    morning: sourcedNum(495, 'G', [CH_mk, AL_mk], '設定変更時・青島vs波多野敗北後。周期天井は最大4周期に短縮。+α'),
   },
   quitRules: [
     { id: 'after-at', situation: 'AT後', checkCount: 0, unit: 'G', action: '即ヤメ', status: 'sample', sources: [] },
@@ -44,8 +49,8 @@ export const monkeyTurnV: Machine = {
   },
   zoneRules: [],
   skipRules: {
-    definition: 'CZ失敗回数（サンプル定義）',
-    ceiling: num(5, '回'),
+    definition: '優出モードの失敗回数（優出モード1回＝1周期）',
+    ceiling: sourcedNum(5, '回', [CH_mk], '5スルー後、6回目の優出モードでAT。出典1件のため確認待ち'),
     aimFrom: num(3, '回'),
   },
   morningRules: {

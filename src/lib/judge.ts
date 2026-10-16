@@ -44,7 +44,11 @@ export const distanceTo = (ceiling: NumValue | null | undefined, current: number
 /** 狙い先の天井を選ぶ。朝イチ（リセット）で朝一の天井が無ければ通常の天井を使う */
 export const pickCeiling = (m: Machine, aim: AimType, morningApplied: boolean): NumValue | null => {
   const c = m.ceilingRules;
-  if (aim === '天井') return morningApplied ? c.morning : c.normal;
+  if (aim === '天井') {
+    // 朝一天井が「なし」（リセットでも短縮されない）なら通常の天井のまま
+    if (morningApplied && !(c.morning.value == null && c.morning.status === 'na')) return c.morning;
+    return c.normal;
+  }
   if (morningApplied && c.czMorning && c.czMorning.value != null && isUsable(c.czMorning.status)) return c.czMorning;
   return c.cz ?? null;
 };
@@ -89,4 +93,4 @@ export const counterKey = (machineId: string, aim: AimType, morning: boolean): s
   aim === 'CZ' && !morning ? `${machineId}#cz` : machineId;
 
 /** 「ゲーム数」「喰」「あべし」など、現在値の呼び名 */
-export const counterName = (unit: Unit): string => (unit === 'G' || unit === '液晶G' ? 'ゲーム数' : unit);
+export const counterName = (unit: Unit): string => (unit === 'G' ? 'ゲーム数' : unit === '液晶G' ? '液晶ゲーム数' : unit);
