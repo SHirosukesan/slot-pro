@@ -11,7 +11,7 @@ import { Logo, NumberSheet, Segmented, StatePill, Thumb, stateText } from '../co
 
 type Mode = '狙い目' | '朝イチ' | '期待値順';
 const RESETS: readonly ResetState[] = ['リセット', '据え置き', '不明'];
-const AIMS: readonly AimType[] = ['天井', 'CZ'];
+const AIMS: readonly AimType[] = ['CZ', '天井'];
 const AIM_LABEL: Record<AimType, string> = { 天井: '天井', CZ: 'CZ天井' };
 
 export function QuickJudge({

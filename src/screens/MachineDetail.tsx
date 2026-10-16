@@ -26,7 +26,7 @@ import { MachineArt, hasArt } from '../components/art';
 import { UserImageContext, Logo, NumberSheet, Segmented, StatePill, StatusTag, stateText } from '../components/ui';
 
 const RESETS: readonly ResetState[] = ['リセット', '据え置き', '不明'];
-const AIMS: readonly AimType[] = ['天井', 'CZ'];
+const AIMS: readonly AimType[] = ['CZ', '天井'];
 
 
 export function MachineDetail({
