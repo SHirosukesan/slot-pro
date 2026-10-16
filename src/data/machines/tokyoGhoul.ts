@@ -17,6 +17,7 @@ export const tokyoGhoul: Machine = {
   entryRules: [
     {
       id: 'normal',
+      aim: '天井',
       condition: '通常',
       unit: 'G',
       minLine: 550,
@@ -26,8 +27,32 @@ export const tokyoGhoul: Machine = {
       status: 'sample',
       sources: [],
     },
+    {
+      id: 'cz',
+      aim: 'CZ',
+      condition: '通常',
+      unit: 'G',
+      minLine: 150,
+      recommended: { min: 150, max: 250 },
+      ev: { min: 1500, max: 3000, condition: EV },
+      status: 'sample',
+      sources: [],
+    },
+    {
+      id: 'cz-morning',
+      aim: 'CZ',
+      condition: '朝イチ',
+      unit: 'G',
+      minLine: 0,
+      recommended: { min: 0, max: 100 },
+      ev: null,
+      status: 'sample',
+      sources: [],
+    },
   ],
   ceilingRules: {
+    cz: num(300, 'G'),
+    czMorning: num(150, 'G'),
     normal: num(999, 'G'),
     morning: num(650, 'G'),
     benefit: text('AT当選'),
@@ -51,6 +76,7 @@ export const tokyoGhoul: Machine = {
   morningRules: {
     entry: {
       id: 'morning',
+      aim: '天井',
       condition: '朝イチ',
       unit: 'G',
       minLine: 0,

@@ -72,6 +72,14 @@ describe('画面', () => {
     expect(screen.getByText('ガックン')).toBeInTheDocument();
   });
 
+  it('狙う対象をCZにするとCZの対象機種だけになる', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('tab', { name: 'CZ' }));
+    expect(screen.queryByText('北斗')).not.toBeInTheDocument();
+    expect(screen.getByText('東京喰種')).toBeInTheDocument();
+    expect(screen.getAllByText(/CZ狙い目/).length).toBeGreaterThan(0);
+  });
+
   it('現在G数を入力すると保存される', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'からくりサーカスの現在G数を入力' }));

@@ -58,6 +58,9 @@ export interface TextValue extends Sourced {
   text: string | null;
 }
 
+/** 何を狙うか。天井狙い（AT・ボーナスの天井）と CZ狙い（チャンスゾーンの天井・ゾーン）を分ける */
+export type AimType = '天井' | 'CZ';
+
 /** 適用条件 */
 export type Condition = '通常' | '朝イチ' | 'リセット' | '据え置き' | 'AT後' | 'ボーナス後';
 
@@ -76,6 +79,9 @@ export interface EvCondition {
 /** 狙い目（範囲がある場合は最低ラインと推奨範囲を分ける） */
 export interface EntryRule extends Sourced {
   id: string;
+  /** 天井狙い / CZ狙い */
+  aim: AimType;
+  /** 通常 / 朝イチ など。朝イチの CZ狙いは condition: '朝イチ' で登録する */
   condition: Condition;
   /** 何で判断するか: G / 液晶G / あべし / pt 等 */
   unit: Unit;
@@ -131,6 +137,10 @@ export interface CeilingRules {
   normal: NumValue;
   /** 「朝一天井」 リセット時の天井。仕組みが無ければ status: 'na' */
   morning: NumValue;
+  /** CZ天井（CZの仕組みが無い機種は省略） */
+  cz?: NumValue;
+  /** 朝一CZ天井（リセット時のCZ天井） */
+  czMorning?: NumValue;
   /** 天井到達時の恩恵（短文） */
   benefit?: TextValue;
 }

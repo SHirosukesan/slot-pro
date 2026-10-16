@@ -17,6 +17,7 @@ export const valvrave: Machine = {
   entryRules: [
     {
       id: 'normal',
+      aim: '天井',
       condition: '通常',
       unit: 'G',
       minLine: 250,
@@ -25,8 +26,32 @@ export const valvrave: Machine = {
       status: 'sample',
       sources: [],
     },
+    {
+      id: 'cz',
+      aim: 'CZ',
+      condition: '通常',
+      unit: 'G',
+      minLine: 200,
+      recommended: { min: 200, max: 300 },
+      ev: { min: 800, max: 2000, condition: EV },
+      status: 'sample',
+      sources: [],
+    },
+    {
+      id: 'cz-morning',
+      aim: 'CZ',
+      condition: '朝イチ',
+      unit: 'G',
+      minLine: 0,
+      recommended: { min: 0, max: 150 },
+      ev: { min: 300, max: 900, condition: EV },
+      status: 'sample',
+      sources: [],
+    },
   ],
   ceilingRules: {
+    cz: num(400, 'G'),
+    czMorning: num(200, 'G'),
     normal: num(1000, 'G'),
     morning: num(600, 'G'),
   },
@@ -43,6 +68,7 @@ export const valvrave: Machine = {
   morningRules: {
     entry: {
       id: 'morning',
+      aim: '天井',
       condition: '朝イチ',
       unit: 'G',
       minLine: 0,

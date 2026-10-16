@@ -17,6 +17,7 @@ export const karakuri: Machine = {
   entryRules: [
     {
       id: 'normal',
+      aim: '天井',
       condition: '通常',
       unit: 'G',
       minLine: 300,
@@ -25,8 +26,21 @@ export const karakuri: Machine = {
       status: 'sample',
       sources: [],
     },
+    {
+      id: 'cz',
+      aim: 'CZ',
+      condition: '通常',
+      unit: 'G',
+      minLine: 150,
+      recommended: { min: 150, max: 250 },
+      ev: null,
+      status: 'sample',
+      sources: [],
+    },
   ],
   ceilingRules: {
+    cz: num(300, 'G'),
+    czMorning: num(null, 'G', 'na'),
     normal: num(800, 'G'),
     morning: num(null, 'G', 'na'),
   },

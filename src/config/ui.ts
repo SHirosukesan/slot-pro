@@ -18,6 +18,8 @@ export type DetailKey =
   | 'ev'
   | 'ceilingNormal'
   | 'ceilingMorning'
+  | 'czCeiling'
+  | 'czMorning'
   | 'quit'
   | 'precursor'
   | 'zone'
@@ -32,6 +34,8 @@ export const DETAIL_ORDER: DetailKey[] = [
   'ev',
   'ceilingNormal',
   'ceilingMorning',
+  'czCeiling',
+  'czMorning',
   'quit',
   'precursor',
   'zone',

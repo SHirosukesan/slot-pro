@@ -14,8 +14,8 @@ import {
   Target,
   Repeat,
 } from 'lucide-react';
-import type { ExternalLink as XLink, Machine, ResetState } from '../types/machine';
-import { judge } from '../lib/judge';
+import type { AimType, ExternalLink as XLink, Machine, ResetState } from '../types/machine';
+import { counterKey, hasAim, judge } from '../lib/judge';
 import { fileToThumb, isImageFile } from '../lib/image';
 import { remainingNet } from '../lib/advantage';
 import { fmtCheckCount, fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
@@ -25,13 +25,33 @@ import { MachineArt, hasArt } from '../components/art';
 import { UserImageContext, Logo, NumberSheet, Segmented, StatePill, StatusTag, stateText } from '../components/ui';
 
 const RESETS: readonly ResetState[] = ['リセット', '据え置き', '不明'];
+const AIMS: readonly AimType[] = ['天井', 'CZ'];
 
 
-export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: AppState; morning: boolean; onBack: () => void }) {
+export function MachineDetail({
+  m,
+  app,
+  morning,
+  aim: aimProp,
+  onAim,
+  onBack,
+}: {
+  m: Machine;
+  app: AppState;
+  morning: boolean;
+  aim: AimType;
+  onAim: (a: AimType) => void;
+  onBack: () => void;
+}) {
   const [sheet, setSheet] = useState<'count' | 'net' | null>(null);
   const reset = app.resets[m.machineId] ?? '不明';
-  const cur = app.counters[m.machineId] ?? null;
-  const j = judge(m, cur, morning, reset);
+  const czAvailable = hasAim(m, 'CZ');
+  // CZの仕組みが無い機種では常に天井狙い
+  const aim: AimType = czAvailable ? aimProp : '天井';
+  const key = counterKey(m.machineId, aim, morning);
+  const cur = app.counters[key] ?? null;
+  const j = judge(m, cur, morning, reset, aim);
+  const ceilName = `${j.morningApplied ? '朝一' : ''}${aim === 'CZ' ? 'CZ天井' : '天井'}`;
   const fav = app.favorites.includes(m.machineId);
   const rule = j.rule;
   const adv = m.advantageousSectionRules;
@@ -48,6 +68,8 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
     ev: null,
     ceilingNormal: <Tile key="cn" label="通常天井" value={numText(m.ceilingRules.normal)} />,
     ceilingMorning: resetInfo ? <Tile key="cm" label="朝一天井" value={numText(m.ceilingRules.morning)} tone="text-near" /> : null,
+    czCeiling: m.ceilingRules.cz ? <Tile key="cz" label="CZ天井" value={numText(m.ceilingRules.cz)} tone="text-accent" /> : null,
+    czMorning: resetInfo && m.ceilingRules.czMorning ? <Tile key="czm" label="朝一CZ天井" value={numText(m.ceilingRules.czMorning)} tone="text-near" /> : null,
     quit:
       m.quitRules.length > 0 ? (
         <Tile
@@ -125,8 +147,16 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
       {/* 現在のゲーム数＋狙い目・推奨範囲・期待値（最優先の情報を1枚にまとめる） */}
       <section className="card overflow-hidden">
         <div className="p-card pb-3">
+          {czAvailable && (
+            <div className="mb-3">
+              <Segmented<AimType> size="sm" label="狙う対象" value={aim} options={AIMS} onChange={onAim} />
+            </div>
+          )}
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[14px] text-sub">現在の{m.counterUnit === 'G' ? 'ゲーム数' : m.counterUnit}</span>
+            <span className="text-[14px] text-sub">
+              現在の{aim === 'CZ' && !morning ? 'CZ' : ''}
+              {m.counterUnit === 'G' ? 'ゲーム数' : m.counterUnit}
+            </span>
             <StatePill state={j.state} label={j.state === 'go' ? '今打てる' : j.label} big />
           </div>
           <button onClick={() => setSheet('count')} className="flex items-baseline gap-1 group mt-1" aria-label="現在値を入力">
@@ -136,13 +166,21 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
             <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{m.counterUnit}</span>
             <Pencil size={16} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
           </button>
+          {j.distance != null && (
+            <div className="mt-2 text-[14px] text-sub">
+              {ceilName}まで{' '}
+              <b className={`num text-[18px] ${j.distance === 0 ? 'text-prio' : 'text-fg'}`}>
+                {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${j.ceiling?.unit ?? ''}`}
+              </b>
+            </div>
+          )}
         </div>
 
         {(show('aim') || show('ev')) && (
           <>
             <div className="grid grid-cols-2 border-t border-line divide-x divide-line">
               <Stat
-                label={j.morningApplied ? '朝イチ狙い目' : '狙い目'}
+                label={`${j.morningApplied ? '朝イチ' : ''}${aim === 'CZ' ? 'CZ' : ''}狙い目`}
                 icon={<Target size={15} className="text-prio" aria-hidden />}
                 value={rule?.minLine != null ? `${fmtNum(rule.minLine)}${rule.unit}〜` : '未確認'}
               />
@@ -325,7 +363,7 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
         title={`現在の${m.counterUnit}数`}
         unit={m.counterUnit}
         value={cur}
-        onSave={(v) => app.setCounter(m.machineId, v)}
+        onSave={(v) => app.setCounter(key, v)}
       />
       <NumberSheet
         open={sheet === 'net'}

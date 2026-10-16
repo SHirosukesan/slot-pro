@@ -18,6 +18,7 @@ const evCondition = z.object({
 const entry = z.object({
   ...sourced,
   id: z.string(),
+  aim: z.enum(['天井', 'CZ']),
   condition: z.enum(['通常', '朝イチ', 'リセット', '据え置き', 'AT後', 'ボーナス後']),
   unit,
   minLine: n,
@@ -44,7 +45,7 @@ export const machineSchema = z.object({
   hue: z.number().min(0).max(360),
   counterUnit: unit,
   entryRules: z.array(entry),
-  ceilingRules: z.object({ normal: numVal, morning: numVal, benefit: textVal.optional() }),
+  ceilingRules: z.object({ normal: numVal, morning: numVal, cz: numVal.optional(), czMorning: numVal.optional(), benefit: textVal.optional() }),
   quitRules: z.array(z.object({ ...sourced, id: z.string(), situation: z.string(), checkCount: n, unit, action: z.string() })),
   precursorRules: z
     .object({

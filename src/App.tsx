@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { AimType } from './types/machine';
 import { Crown, ListChecks, Settings } from 'lucide-react';
 import { machineById } from './data/machines';
 import { useAppState } from './state/useAppState';
@@ -14,6 +15,8 @@ export default function App() {
   const app = useAppState();
   const [tab, setTab] = useState<Tab>('quick');
   const [mode, setMode] = useState<'狙い目' | '朝イチ'>('狙い目');
+  /** 天井狙い / CZ狙い（クイック判定と機種詳細で共通） */
+  const [aim, setAim] = useState<AimType>('天井');
   const [detailId, setDetailId] = useState<string | null>(null);
   const detail = detailId ? machineById(detailId) : undefined;
 
@@ -52,11 +55,13 @@ export default function App() {
         style={{ paddingLeft: 'max(var(--sp-gutter), env(safe-area-inset-left, 0px))', paddingRight: 'max(var(--sp-gutter), env(safe-area-inset-right, 0px))', paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
         {detail ? (
-          <MachineDetail key={detail.machineId} m={detail} app={app} morning={mode === '朝イチ'} onBack={close} />
+          <MachineDetail key={detail.machineId} m={detail} app={app} morning={mode === '朝イチ'} aim={aim} onAim={setAim} onBack={close} />
         ) : tab === 'quick' ? (
           <QuickJudge
             app={app}
             mode={mode}
+            aim={aim}
+            onAim={setAim}
             onMode={(m) => (m === '期待値順' ? setTab('rank') : setMode(m))}
             onOpen={open}
             onSettings={() => setTab('settings')}

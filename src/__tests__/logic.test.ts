@@ -1,7 +1,7 @@
 import { MACHINES, machineById } from '../data/machines';
 import { tokyoGhoul } from '../data/machines/tokyoGhoul';
 import { searchMachines } from '../lib/search';
-import { judge } from '../lib/judge';
+import { counterKey, hasAim, judge } from '../lib/judge';
 import { fmtCheckCount, fmtEvRange, fmtRange, numText } from '../lib/format';
 import { remainingNet } from '../lib/advantage';
 import { rankSlots } from '../lib/ranking';
@@ -33,14 +33,14 @@ describe('通常天井と朝一天井の区別', () => {
   it('リセット時だけ朝一天井・朝イチ狙い目を使う', () => {
     const r = judge(tokyoGhoul, 100, true, 'リセット');
     expect(r.morningApplied).toBe(true);
-    expect(r.ceiling.value).toBe(650);
+    expect(r.ceiling?.value).toBe(650);
     expect(r.state).toBe('go');
   });
   it('朝イチでも不明・据え置きはリセット扱いしない', () => {
     for (const s of ['不明', '据え置き'] as const) {
       const r = judge(tokyoGhoul, 100, true, s);
       expect(r.morningApplied).toBe(false);
-      expect(r.ceiling.value).toBe(999);
+      expect(r.ceiling?.value).toBe(999);
       expect(r.state).toBe('skip');
     }
   });
@@ -54,6 +54,37 @@ describe('通常天井と朝一天井の区別', () => {
     const m = clone(tokyoGhoul);
     m.entryRules[0]!.status = 'unverified';
     expect(judge(m, 900, false, '不明').state).toBe('unknown');
+  });
+});
+
+describe('天井狙いとCZ狙い', () => {
+  it('CZ狙いはCZの狙い目・CZ天井で判定し、残りGを出す', () => {
+    const r = judge(tokyoGhoul, 200, false, '不明', 'CZ');
+    expect(r.rule?.aim).toBe('CZ');
+    expect(r.ceiling?.value).toBe(300);
+    expect(r.distance).toBe(100);
+    expect(r.state).toBe('go');
+  });
+  it('朝イチ・リセットのCZ狙いは朝一CZ天井まで', () => {
+    const r = judge(tokyoGhoul, 40, true, 'リセット', 'CZ');
+    expect(r.ceiling?.value).toBe(150);
+    expect(r.distance).toBe(110);
+  });
+  it('朝一CZ天井が無い機種はリセットでも通常のCZ天井', () => {
+    const k = machineById('slot.smart.karakuri-circus.v1')!;
+    expect(judge(k, 100, true, 'リセット', 'CZ').ceiling?.value).toBe(300);
+  });
+  it('CZの仕組みが無い機種はCZ狙いの対象外', () => {
+    expect(hasAim(machineById('slot.smart.hokuto-no-ken.v1')!, 'CZ')).toBe(false);
+    expect(hasAim(tokyoGhoul, 'CZ')).toBe(true);
+  });
+  it('天井を超えていたら残り0（到達）', () => {
+    expect(judge(tokyoGhoul, 1200, false, '不明', '天井').distance).toBe(0);
+  });
+  it('天井狙いとCZ狙いはG数を別々に保存、朝イチは共通', () => {
+    expect(counterKey('a', '天井', false)).toBe('a');
+    expect(counterKey('a', 'CZ', false)).toBe('a#cz');
+    expect(counterKey('a', 'CZ', true)).toBe('a');
   });
 });
 

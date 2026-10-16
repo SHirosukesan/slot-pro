@@ -9,6 +9,8 @@
    - スルーの仕組みが無ければ `skipRules: null`（画面に出ない）
    - やめどきの確認G数は必須。不要なら `0`、不明なら `null`
    - 狙い目は `minLine`（最低ライン）と `recommended`（推奨範囲）を分ける
+   - 狙い目には `aim: '天井' | 'CZ'` を付ける。CZ狙いがある機種は `ceilingRules.cz`（CZ天井）と、あれば `czMorning`（朝一CZ天井）も入れる
+   - 朝イチの狙い目は `condition: '朝イチ'` で登録する（天井・CZそれぞれ）
    - 期待値は根拠がなければ `ev: null`（「未算出」）
    - 有利区間は `regulatoryNetBaseline`（規定上の基準）と `cutConditions`（機種固有）を分ける。差枚と獲得枚数は `kind` で区別
 4. `src/data/machines/index.ts` の `MACHINES` に追加。

@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Pencil, Search, Settings, Star, Target } from 'lucide-react';
-import type { Machine, ResetState } from '../types/machine';
+import type { AimType, Machine, ResetState } from '../types/machine';
 import { MACHINES } from '../data/machines';
 import { searchMachines } from '../lib/search';
-import { judge } from '../lib/judge';
+import { counterKey, distanceTo, hasAim, judge, pickCeiling } from '../lib/judge';
 import { fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
 import { LIST_ITEMS } from '../config/ui';
 import type { AppState } from '../state/useAppState';
@@ -11,30 +11,36 @@ import { Logo, NumberSheet, Segmented, StatePill, Thumb, stateText } from '../co
 
 type Mode = '狙い目' | '朝イチ' | '期待値順';
 const RESETS: readonly ResetState[] = ['リセット', '据え置き', '不明'];
+const AIMS: readonly AimType[] = ['天井', 'CZ'];
+const AIM_LABEL: Record<AimType, string> = { 天井: '天井', CZ: 'CZ天井' };
 
 export function QuickJudge({
   app,
   mode,
+  aim,
+  onAim,
   onMode,
   onOpen,
   onSettings,
 }: {
   app: AppState;
   mode: '狙い目' | '朝イチ';
+  aim: AimType;
+  onAim: (a: AimType) => void;
   onMode: (m: Mode) => void;
   onOpen: (id: string) => void;
   onSettings: () => void;
 }) {
   const [query, setQuery] = useState('');
   const [favOnly, setFavOnly] = useState(false);
-  const [editing, setEditing] = useState<Machine | null>(null);
+  const [editing, setEditing] = useState<{ m: Machine; key: string } | null>(null);
   const morning = mode === '朝イチ';
 
   const list = useMemo(() => {
-    const hits = searchMachines(MACHINES, query).filter((m) => !favOnly || app.favorites.includes(m.machineId));
+    const hits = searchMachines(MACHINES, query).filter((m) => (!favOnly || app.favorites.includes(m.machineId)) && hasAim(m, aim));
     // お気に入りを上に
     return [...hits].sort((a, b) => Number(app.favorites.includes(b.machineId)) - Number(app.favorites.includes(a.machineId)));
-  }, [query, favOnly, app.favorites]);
+  }, [query, favOnly, app.favorites, aim]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,6 +57,14 @@ export function QuickJudge({
       </div>
 
       <Segmented<Mode> label="表示モード" value={mode} options={['狙い目', '朝イチ', '期待値順']} onChange={onMode} />
+
+      {/* 天井狙い / CZ狙い の切り替え */}
+      <div className="flex items-center gap-3 -mt-1">
+        <span className="text-[13px] text-sub shrink-0">狙う対象</span>
+        <div className="flex-1">
+          <Segmented<AimType> size="sm" label="狙う対象" value={aim} options={AIMS} onChange={onAim} />
+        </div>
+      </div>
 
       <div className="flex gap-2">
         <label className="card flex-1 flex items-center gap-2 px-3.5 h-12 min-w-0">
@@ -84,11 +98,14 @@ export function QuickJudge({
       <ul className="flex flex-col gap-3">
         {list.map((m) => {
           const reset = app.resets[m.machineId] ?? '不明';
-          const cur = app.counters[m.machineId] ?? null;
-          const j = judge(m, cur, morning, reset);
+          const key = counterKey(m.machineId, aim, morning);
+          const cur = app.counters[key] ?? null;
+          const j = judge(m, cur, morning, reset, aim);
           const fav = app.favorites.includes(m.machineId);
-          const ceil = j.ceiling.value;
+          const ceil = j.ceiling?.value ?? null;
           const showCeiling = j.state === 'prio' && ceil != null;
+          const ceilName = `${j.morningApplied ? '朝一' : ''}${AIM_LABEL[aim]}`;
+          const aimName = `${j.morningApplied ? '朝イチ' : ''}${aim === 'CZ' ? 'CZ' : ''}狙い目`;
           return (
             <li key={m.machineId} className="card overflow-hidden">
               <div className="flex gap-3 p-card">
@@ -105,9 +122,9 @@ export function QuickJudge({
                   </div>
 
                   <button
-                    onClick={() => setEditing(m)}
+                    onClick={() => setEditing({ m, key })}
                     className="group flex items-baseline gap-1 mt-0.5"
-                    aria-label={`${m.shortName}の現在${m.counterUnit}数を入力`}
+                    aria-label={`${m.shortName}の現在${aim === 'CZ' && !morning ? 'CZ' : ''}${m.counterUnit}数を入力`}
                   >
                     <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-big)' }}>
                       {cur == null ? '---' : fmtNum(cur)}
@@ -122,11 +139,11 @@ export function QuickJudge({
                         <Target size={16} className={showCeiling ? 'text-prio' : 'text-prio/80'} aria-hidden />
                         {showCeiling ? (
                           <span className="font-bold text-prio">
-                            {morning && j.morningApplied ? '朝一天井' : '天井'} <span className="num">{fmtNum(ceil)}{j.ceiling.unit}</span>
+                            {ceilName} <span className="num">{fmtNum(ceil)}{j.ceiling?.unit}</span>
                           </span>
                         ) : (
                           <span className="text-fg/90">
-                            {j.morningApplied ? '朝イチ狙い目' : '狙い目'}{' '}
+                            {aimName}{' '}
                             <span className="num font-bold">
                               {j.rule?.minLine != null ? `${fmtNum(j.rule.minLine)}${j.rule.unit}〜` : '未確認'}
                             </span>
@@ -145,6 +162,14 @@ export function QuickJudge({
                     {LIST_ITEMS.ev && (
                       <div className="text-sub">
                         期待値 <span className="num font-bold text-go/90">{fmtEvRange(j.rule?.ev ?? null)}</span>
+                      </div>
+                    )}
+                    {j.distance != null && (
+                      <div className="text-sub">
+                        {ceilName}まで{' '}
+                        <span className={`num font-bold ${j.distance === 0 ? 'text-prio' : 'text-fg'}`}>
+                          {j.distance === 0 ? '到達' : `あと${fmtNum(j.distance)}${j.ceiling?.unit ?? ''}`}
+                        </span>
                       </div>
                     )}
                     {LIST_ITEMS.ceiling && (
@@ -175,6 +200,7 @@ export function QuickJudge({
                       <span>
                         朝一天井 <b className="num text-near">{numText(m.ceilingRules.morning)}</b>
                       </span>
+                      {m.ceilingRules.cz && <MorningCz m={m} reset={reset} current={app.counters[m.machineId] ?? null} />}
                       <span>
                         リセット恩恵 <b className="text-fg/90">{m.morningRules.resetBenefit.text ?? missingText(m.morningRules.resetBenefit.status)}</b>
                       </span>
@@ -198,12 +224,26 @@ export function QuickJudge({
       <NumberSheet
         open={editing != null}
         onClose={() => setEditing(null)}
-        title={editing ? `${editing.shortName} 現在の${editing.counterUnit}数` : ''}
-        unit={editing?.counterUnit ?? 'G'}
-        value={editing ? (app.counters[editing.machineId] ?? null) : null}
-        onSave={(v) => editing && app.setCounter(editing.machineId, v)}
+        title={editing ? `${editing.m.shortName} 現在の${editing.key.endsWith('#cz') ? 'CZ' : ''}${editing.m.counterUnit}数` : ''}
+        unit={editing?.m.counterUnit ?? 'G'}
+        value={editing ? (app.counters[editing.key] ?? null) : null}
+        onSave={(v) => editing && app.setCounter(editing.key, v)}
       />
     </div>
+  );
+}
+
+/** 朝イチ：CZまでの距離（リセットなら朝一CZ天井、それ以外は通常のCZ天井） */
+function MorningCz({ m, reset, current }: { m: Machine; reset: ResetState; current: number | null }) {
+  const morningApplied = reset === 'リセット';
+  const c = pickCeiling(m, 'CZ', morningApplied);
+  const d = distanceTo(c, current);
+  const name = morningApplied && c === m.ceilingRules.czMorning ? '朝一CZ天井' : 'CZ天井';
+  return (
+    <span>
+      {name} <b className="num text-accent">{c ? numText(c) : '未確認'}</b>
+      {d != null && <b className={`num ml-1 ${d === 0 ? 'text-prio' : 'text-fg'}`}>（{d === 0 ? '到達' : `あと${fmtNum(d)}G`}）</b>}
+    </span>
   );
 }
 

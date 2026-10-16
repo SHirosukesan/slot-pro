@@ -17,6 +17,7 @@ export const monkeyTurnV: Machine = {
   entryRules: [
     {
       id: 'normal',
+      aim: '天井',
       condition: '通常',
       unit: 'G',
       minLine: 500,
