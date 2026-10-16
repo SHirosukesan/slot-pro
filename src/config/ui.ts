@@ -47,5 +47,5 @@ export const STEP_BUTTONS = [-100, -10, 10, 100] as const;
 /** 期待値の基準条件の選択肢 */
 export const EXCHANGE_RATES = [5.0, 5.6, 6.0] as const;
 
-/** 期待値順で大きなカードで出す台数（それ以降は1行で順番だけ表示） */
+/** 期待値順の1ページに出す台数（それ以降は 1 2 3… のページ送り） */
 export const RANKING_TOP = 5;

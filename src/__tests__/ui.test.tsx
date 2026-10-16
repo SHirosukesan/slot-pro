@@ -65,11 +65,12 @@ describe('画面', () => {
     fireEvent.click(screen.getByRole('button', { name: /順位外 \d+台/ }));
     expect(screen.getByText('条件不一致')).toBeInTheDocument();
     expect(screen.getAllByTestId('ev-excluded')[0]).toHaveClass('text-ev');
-    // 上位5台は大きなカード、6位以降は1行
+    // 1ページ5台、2ページ目に6位
     expect(screen.getByRole('list', { name: 'ランキング' }).children).toHaveLength(5);
-    expect(screen.getByRole('list', { name: '6位以下' }).children).toHaveLength(1);
+    expect(screen.getAllByTestId('ev-value')[0]).toHaveClass('text-ev');
+    fireEvent.click(screen.getByRole('button', { name: '2ページ目' }));
+    expect(screen.getByRole('list', { name: 'ランキング' }).children).toHaveLength(1);
     const values = screen.getAllByTestId('ev-value');
-    expect(values[0]).toHaveClass('text-ev');
     expect(values[values.length - 1]).toHaveClass('text-prio');
     expect(values[values.length - 1]).toHaveTextContent('−1,200円');
   });

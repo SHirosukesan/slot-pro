@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Crown, Info, Settings } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Crown, Info, Settings } from 'lucide-react';
 import { machineById } from '../data/machines';
 import { SAMPLE_SLOTS } from '../data/sampleSlots';
 import { SAMPLE_EV_CONDITION } from '../data/helpers';
@@ -18,9 +18,15 @@ export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (i
   const [showExcluded, setShowExcluded] = useState(false);
   const { ranked, excluded, hourlyAvailable, sortedBy } = rankSlots(SAMPLE_SLOTS, app.evBase, sortBy === '時給' ? 'hourly' : 'ev');
   const showHourly = sortedBy === 'hourly';
-  // 上位は大きなカード、それ以降は1行で順番だけ
-  const top = ranked.slice(0, RANKING_TOP);
-  const rest = ranked.slice(RANKING_TOP);
+  // 1ページ5台。2ページ目以降は下の 1 2 3 … で移動
+  const [page, setPage] = useState(1);
+  const [exPage, setExPage] = useState(1);
+  const pages = Math.max(1, Math.ceil(ranked.length / RANKING_TOP));
+  const exPages = Math.max(1, Math.ceil(excluded.length / RANKING_TOP));
+  const cur = Math.min(page, pages);
+  const exCur = Math.min(exPage, exPages);
+  const shown = ranked.slice((cur - 1) * RANKING_TOP, cur * RANKING_TOP);
+  const exShown = excluded.slice((exCur - 1) * RANKING_TOP, exCur * RANKING_TOP);
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,19 +76,14 @@ export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (i
           </button>
         </div>
       ) : (
-        <ol className="flex flex-col gap-2.5" aria-label="ランキング">
-          {top.map((s, i) => (
-            <RankRow key={s.id} s={s} rank={i + 1} showHourly={showHourly} onOpen={onOpen} />
-          ))}
-        </ol>
-      )}
-
-      {rest.length > 0 && (
-        <ol className="card divide-y divide-line" start={RANKING_TOP + 1} aria-label={`${RANKING_TOP + 1}位以下`}>
-          {rest.map((s, i) => (
-            <CompactRow key={s.id} s={s} rank={RANKING_TOP + 1 + i} showHourly={showHourly} onOpen={onOpen} />
-          ))}
-        </ol>
+        <>
+          <ol className="flex flex-col gap-2.5" aria-label="ランキング" start={(cur - 1) * RANKING_TOP + 1}>
+            {shown.map((s, i) => (
+              <RankRow key={s.id} s={s} rank={(cur - 1) * RANKING_TOP + i + 1} showHourly={showHourly} onOpen={onOpen} />
+            ))}
+          </ol>
+          <Pager label="ランキングのページ" page={cur} pages={pages} onChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+        </>
       )}
 
       {excluded.length > 0 && (
@@ -96,10 +97,17 @@ export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (i
             <ChevronDown size={18} className={`transition-transform ${showExcluded ? 'rotate-180' : ''}`} aria-hidden />
           </button>
           {showExcluded && (
-            <div className="divide-y divide-line border-t border-line">
-              {excluded.map((e) => (
-                <ExcludedRow key={e.slot.id} e={e} onOpen={onOpen} />
-              ))}
+            <div className="border-t border-line">
+              <div className="divide-y divide-line">
+                {exShown.map((e) => (
+                  <ExcludedRow key={e.slot.id} e={e} onOpen={onOpen} />
+                ))}
+              </div>
+              {exPages > 1 && (
+                <div className="border-t border-line py-2.5">
+                  <Pager label="順位外のページ" page={exCur} pages={exPages} onChange={setExPage} />
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -145,27 +153,30 @@ function RankRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number;
   );
 }
 
-function CompactRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number; showHourly: boolean; onOpen: (id: string) => void }) {
-  const m = machineById(s.machineId);
-  if (!m) return null;
-  const v = showHourly ? (s.hourly ?? 0) : (s.ev ?? 0);
+/** ページ送り（‹ 1 2 3 4 ›）。1ページしかなければ出さない */
+function Pager({ page, pages, onChange, label }: { page: number; pages: number; onChange: (p: number) => void; label: string }) {
+  if (pages <= 1) return null;
+  const btn = 'num size-10 grid place-items-center rounded-full text-[16px] font-bold';
   return (
-    <li>
-      <button onClick={() => onOpen(m.machineId)} className="w-full flex items-center gap-3 px-card py-2.5 text-left">
-        <span className="num w-6 text-center text-[18px] font-extrabold italic text-dim">{rank}</span>
-        <Thumb m={m} size="36px" rounded={8} />
-        <span className="flex-1 min-w-0">
-          <span className="block text-[15px] font-bold truncate">{m.shortName}</span>
-          <span className="num block text-[12px] text-sub">
-            {fmtNum(s.current)}
-            {s.unit}
-          </span>
-        </span>
-        <span className={`num text-[18px] font-extrabold whitespace-nowrap ${evTone(v)}`} data-testid="ev-value">
-          {signedYen(v)}
-        </span>
+    <nav aria-label={label} className="flex items-center justify-center gap-1.5">
+      <button onClick={() => onChange(page - 1)} disabled={page === 1} aria-label="前のページ" className={`${btn} text-sub disabled:opacity-30`}>
+        <ChevronLeft size={20} />
       </button>
-    </li>
+      {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+        <button
+          key={p}
+          onClick={() => onChange(p)}
+          aria-current={p === page ? 'page' : undefined}
+          aria-label={`${p}ページ目`}
+          className={`${btn} ${p === page ? 'bg-accent text-white' : 'text-sub hover:text-fg bg-surface border border-line'}`}
+        >
+          {p}
+        </button>
+      ))}
+      <button onClick={() => onChange(page + 1)} disabled={page === pages} aria-label="次のページ" className={`${btn} text-sub disabled:opacity-30`}>
+        <ChevronRight size={20} />
+      </button>
+    </nav>
   );
 }
 
