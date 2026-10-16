@@ -1,0 +1,29 @@
+/* SLOT PRO デザイントークン — ここを変えるとアプリ全体に反映される */
+:root {
+  color-scheme: dark;
+  /* 背景・面 */
+  --c-bg: #0c0d11;
+  --c-surface: #16171d;
+  --c-raised: #1e1f27;
+  --c-line: #2a2b35;
+  /* 文字 */
+  --c-fg: #f4f4f7;
+  --c-sub: #a3a5b3;
+  --c-dim: #6c6e7c;
+  /* アクセント（紫） */
+  --c-accent: #7b6cff;
+  --c-accent-soft: rgba(123, 108, 255, 0.16);
+  /* 判定色（色だけに頼らずアイコン・文言も併用） */
+  --c-go: #4be38a;
+  --c-near: #f6d84a;
+  --c-prio: #ff5c7c;
+  --c-skip: #7d7f8c;
+  --c-gold: #f2c14e;
+  /* 形 */
+  --r-card: 18px;
+  --sp-card: 14px;
+  --sp-gutter: 16px;
+  --thumb: 88px;
+  --fs-big: 54px;
+  --fs-detail-big: 64px;
+}

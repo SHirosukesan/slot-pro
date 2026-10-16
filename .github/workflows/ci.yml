@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: 型チェック
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: 機種データ検証
+        run: npm run validate:data
+      - name: テスト
+        run: npm test
+      - name: ビルド
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  # 公開は STEP 6 で有効化。上の check（データ検証を含む）が失敗したら公開しない。
+  # deploy:
+  #   needs: check
+  #   if: github.ref == 'refs/heads/main'
+  #   ...

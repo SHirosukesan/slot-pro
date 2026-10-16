@@ -1,0 +1,69 @@
+import type { Machine } from '../../types/machine';
+import { SAMPLE_EV_CONDITION as EV, detect, naText, num, text } from '../helpers';
+
+/** ※数値はすべて STEP1 の表示サンプル（架空）。実機値ではない */
+export const karakuri: Machine = {
+  machineId: 'slot.smart.karakuri-circus.v1',
+  officialName: 'Lからくりサーカス',
+  shortName: 'からくりサーカス',
+  modelCode: null,
+  version: '1',
+  aliases: ['からくり', 'カラクリ', 'からくりサーカス', 'Lからくり'],
+  machineType: 'pachislot',
+  manufacturer: null,
+  image: { src: null, credit: null, license: '未確認' },
+  hue: 150,
+  counterUnit: 'G',
+  entryRules: [
+    {
+      id: 'normal',
+      condition: '通常',
+      unit: 'G',
+      minLine: 300,
+      recommended: { min: 300, max: 450 },
+      ev: { min: 1500, max: null, condition: EV },
+      status: 'sample',
+      sources: [],
+    },
+  ],
+  ceilingRules: {
+    normal: num(800, 'G'),
+    morning: num(null, 'G', 'na'),
+  },
+  quitRules: [
+    { id: 'after-at', situation: 'AT後', checkCount: 50, unit: 'G', action: 'ゾーン抜けまで', status: 'sample', sources: [] },
+  ],
+  precursorRules: {
+    onset: { min: 5, max: 20, unit: 'G' },
+    checkCount: 20,
+    checkUnit: 'G',
+    endCondition: null,
+    status: 'sample',
+    sources: [],
+  },
+  zoneRules: [{ id: 'z1', label: 'ゾーン', min: 200, max: 250, unit: 'G', status: 'sample', sources: [] }],
+  skipRules: null,
+  morningRules: {
+    entry: null,
+    resetBenefit: naText(),
+    carryOver: text('ステージで示唆'),
+    gakkun: detect('ガックン', '電源ON時のリール挙動', '示唆'),
+    initialState: detect('液晶', '朝の背景ステージ', '示唆'),
+    otherDetections: [],
+    limits: text('判別不可の店舗あり'),
+  },
+  advantageousSectionRules: {
+    regulatoryNetBaseline: num(2400, '枚'),
+    mechanism: 'none',
+    cutConditions: [],
+    benefit: naText(),
+    detection: naText(),
+  },
+  sourceLinks: [
+    { kind: 'settei', site: null, url: null },
+    { kind: 'reset', site: null, url: null },
+    { kind: 'advantage', site: null, url: null },
+  ],
+  verifiedAt: null,
+  verificationStatus: 'sample',
+};
