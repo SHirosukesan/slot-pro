@@ -131,6 +131,15 @@ describe('画面', () => {
     expect(values[values.length - 1]).toHaveTextContent('−1,200円');
   });
 
+  it('期待値順は天井とCZの近い方を出し、その狙いで詳細を開く', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('tab', { name: '期待値順' }));
+    expect(screen.getAllByTestId('near-distance')[0]).toHaveTextContent('あと180');
+    fireEvent.click(screen.getByRole('button', { name: /東京喰種/ }));
+    expect(screen.getByText('CZ天井までのゲーム数')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'CZ', selected: true })).toBeInTheDocument();
+  });
+
   it('条件に合う期待値がなければ基準に戻すボタンを出す', () => {
     localStorage.setItem('slotpro:v1:evBase', JSON.stringify({ exchangeRate: 5, play: '現金', quitAssumption: '機種別やめどき', closingConsidered: false }));
     render(<App />);

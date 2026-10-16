@@ -5,7 +5,7 @@ import { machineById } from './data/machines';
 import { useAppState } from './state/useAppState';
 import { QuickJudge } from './screens/QuickJudge';
 import { MachineDetail } from './screens/MachineDetail';
-import { Ranking } from './screens/Ranking';
+import { Ranking, type OpenSlot } from './screens/Ranking';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { UserImageContext } from './components/ui';
 
@@ -44,7 +44,15 @@ export default function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  const open = (id: string) => {
+  /** 機種詳細を開く。期待値順から開いた時は、その台の値と狙い（天井/CZ）をセットする */
+  const open: OpenSlot = (id, from) => {
+    if (from) {
+      app.setCounter(id, from.slot.current);
+      if (from.slot.czCurrent != null) app.setCounter(`${id}#cz`, from.slot.czCurrent);
+      app.setReset(id, from.slot.resetState);
+      setAim(from.aim);
+      setMode('狙い目');
+    }
     try {
       history.pushState({ detail: id }, '');
     } catch {

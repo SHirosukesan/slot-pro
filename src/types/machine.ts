@@ -276,9 +276,11 @@ export type ResetState = 'リセット' | '据え置き' | '不明';
 export interface SlotEntry {
   id: string;
   machineId: string;
-  /** 現在値（G・pt・あべし等） */
+  /** 天井側の現在値（AT・ボーナス間のG数など） */
   current: number;
   unit: Unit;
+  /** CZ側の現在値（CZ間の液晶G数など）。CZの仕組みが無い機種・不明なら null */
+  czCurrent: number | null;
   skipCount: number | null;
   resetState: ResetState;
   storeName: string | null;

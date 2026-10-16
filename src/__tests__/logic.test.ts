@@ -4,7 +4,7 @@ import { searchMachines } from '../lib/search';
 import { counterKey, counterName, distanceTo, hasAim, judge } from '../lib/judge';
 import { fmtCheckCount, fmtEvRange, fmtRange, numText, unitText } from '../lib/format';
 import { remainingNet } from '../lib/advantage';
-import { rankSlots } from '../lib/ranking';
+import { nearestTarget, rankSlots } from '../lib/ranking';
 import { SAMPLE_SLOTS } from '../data/sampleSlots';
 import { SAMPLE_EV_CONDITION } from '../data/helpers';
 import { dataWarnings, schemaErrors } from '../lib/validate';
@@ -239,5 +239,19 @@ describe('攻略サイトで照合した天井', () => {
   it('食い違い・出典1件の値は確認待ち', () => {
     expect(by('slot.smart.karakuri-circus.v1').skipRules?.ceiling.status).toBe('needsReview');
     expect(by('slot.smart.monkey-turn-v.v1').skipRules?.ceiling.status).toBe('needsReview');
+  });
+});
+
+describe('期待値順：天井とCZの近い方', () => {
+  const slot = (current: number, czCurrent: number | null) => ({ current, czCurrent, resetState: '不明' as const });
+  it('東京喰種 680G / CZ 420G → CZまであと180', () => {
+    expect(nearestTarget(tokyoGhoul, slot(680, 420))).toMatchObject({ aim: 'CZ', distance: 180 });
+  });
+  it('CZの方が遠ければ天井', () => {
+    expect(nearestTarget(tokyoGhoul, slot(1100, 50))).toMatchObject({ aim: '天井', distance: 100 });
+  });
+  it('CZの仕組みが無い機種・CZ現在値が無い時は天井', () => {
+    expect(nearestTarget(machineById('slot.smart.hokuto-no-ken.v1')!, slot(810, 999))).toMatchObject({ aim: '天井', distance: 458 });
+    expect(nearestTarget(tokyoGhoul, slot(680, null))).toMatchObject({ aim: '天井', distance: 520 });
   });
 });

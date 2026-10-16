@@ -4,15 +4,18 @@ import { machineById } from '../data/machines';
 import { SAMPLE_SLOTS } from '../data/sampleSlots';
 import { SAMPLE_EV_CONDITION } from '../data/helpers';
 import { RANKING_TOP } from '../config/ui';
-import { rankSlots, type Excluded, type RankedSlot } from '../lib/ranking';
-import { fmtNum } from '../lib/format';
+import { nearestTarget, rankSlots, type Excluded, type RankedSlot } from '../lib/ranking';
+import type { AimType, SlotEntry } from '../types/machine';
+import { fmtNum, unitText } from '../lib/format';
 import type { AppState } from '../state/useAppState';
 import { Logo, Segmented, Thumb } from '../components/ui';
 
 /** 1〜3位の王冠：金・銀・銅 */
 const CROWN = ['text-gold', 'text-silver', 'text-bronze'];
 
-export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (id: string) => void; onSettings: () => void }) {
+export type OpenSlot = (machineId: string, from?: { aim: AimType; slot: SlotEntry }) => void;
+
+export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: OpenSlot; onSettings: () => void }) {
   const [sortBy, setSortBy] = useState<'期待値' | '時給'>('期待値');
   const [showInfo, setShowInfo] = useState(false);
   const [showExcluded, setShowExcluded] = useState(false);
@@ -118,13 +121,18 @@ export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (i
   );
 }
 
-function RankRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number; showHourly: boolean; onOpen: (id: string) => void }) {
+function RankRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number; showHourly: boolean; onOpen: OpenSlot }) {
   const m = machineById(s.machineId);
   if (!m) return null;
   const top = rank <= 3;
+  // 天井とCZのうち近い方を出す。詳細もその狙いで開く
+  const near = nearestTarget(m, s);
   return (
     <li>
-      <button onClick={() => onOpen(m.machineId)} className="card w-full flex items-center gap-2.5 p-2.5 text-left hover:border-accent/50">
+      <button
+        onClick={() => onOpen(m.machineId, { aim: near?.aim ?? '天井', slot: s })}
+        className="card w-full flex items-center gap-2.5 p-2.5 text-left hover:border-accent/50"
+      >
         <div className="w-7 shrink-0 flex flex-col items-center">
           {top && <Crown size={22} className={CROWN[rank - 1]} fill="currentColor" aria-hidden />}
           <span className={`num text-[26px] font-extrabold italic leading-none ${top ? CROWN[rank - 1] : 'text-sub'}`}>{rank}</span>
@@ -134,11 +142,30 @@ function RankRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number;
         </span>
         <div className="flex-1 min-w-0">
           <div className="font-bold text-[16px] leading-tight truncate">{m.shortName}</div>
-          <div className="text-[11px] text-sub">現在</div>
-          <div className="num text-[22px] font-extrabold leading-none">
-            {fmtNum(s.current)}
-            <span className="text-[14px] ml-0.5">{s.unit}</span>
-          </div>
+          {near ? (
+            <>
+              <div className="flex items-center gap-1 text-[11px] text-sub">
+                <span className={`rounded-pill px-1.5 font-bold ${near.aim === 'CZ' ? 'bg-accent-soft text-accent' : 'bg-prio/15 text-prio'}`}>{near.aim === 'CZ' ? 'CZ' : '天井'}</span>
+                まで
+              </div>
+              <div className="num text-[22px] font-extrabold leading-none" data-testid="near-distance">
+                {near.distance === 0 ? '到達' : `あと${fmtNum(near.distance)}`}
+                {near.distance !== 0 && <span className="text-[14px] ml-0.5">{unitText(near.unit)}</span>}
+              </div>
+              <div className="num text-[11px] text-sub mt-0.5">
+                現在 {fmtNum(near.current)}
+                {unitText(near.unit)}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-[11px] text-sub">現在</div>
+              <div className="num text-[22px] font-extrabold leading-none">
+                {fmtNum(s.current)}
+                <span className="text-[14px] ml-0.5">{unitText(s.unit)}</span>
+              </div>
+            </>
+          )}
           <div className="text-[11px] text-dim mt-1 truncate">
             {[s.skipCount != null ? `スルー${s.skipCount}回` : null, s.resetState, s.storeName, s.unitNumber ? `${s.unitNumber}番` : null].filter(Boolean).join('・')}
           </div>
@@ -182,11 +209,14 @@ function Pager({ page, pages, onChange, label }: { page: number; pages: number; 
   );
 }
 
-function ExcludedRow({ e, onOpen }: { e: Excluded; onOpen: (id: string) => void }) {
+function ExcludedRow({ e, onOpen }: { e: Excluded; onOpen: OpenSlot }) {
   const m = machineById(e.slot.machineId);
   if (!m) return null;
   return (
-    <button onClick={() => onOpen(m.machineId)} className="w-full flex items-center gap-3 px-card py-2.5 text-left">
+    <button
+      onClick={() => onOpen(m.machineId, { aim: nearestTarget(m, e.slot)?.aim ?? '天井', slot: e.slot })}
+      className="w-full flex items-center gap-3 px-card py-2.5 text-left"
+    >
       <Thumb m={m} size="36px" rounded={8} />
       <div className="flex-1 min-w-0">
         <div className="font-bold text-[15px] truncate">{m.shortName}</div>
