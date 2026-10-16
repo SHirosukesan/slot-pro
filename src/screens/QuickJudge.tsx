@@ -4,7 +4,7 @@ import type { Machine, ResetState } from '../types/machine';
 import { MACHINES } from '../data/machines';
 import { searchMachines } from '../lib/search';
 import { judge } from '../lib/judge';
-import { fmtEvRange, fmtNum, missingText, numText } from '../lib/format';
+import { fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
 import { LIST_ITEMS } from '../config/ui';
 import type { AppState } from '../state/useAppState';
 import { Logo, NumberSheet, Segmented, StatePill, Thumb, stateText } from '../components/ui';
@@ -132,6 +132,14 @@ export function QuickJudge({
                             </span>
                           </span>
                         )}
+                      </div>
+                    )}
+                    {LIST_ITEMS.range && (
+                      <div className="text-sub">
+                        推奨範囲{' '}
+                        <span className="num font-bold text-go">
+                          {(j.rule?.recommended && fmtRange(j.rule.recommended.min, j.rule.recommended.max, j.rule.unit)) ?? '未確認'}
+                        </span>
                       </div>
                     )}
                     {LIST_ITEMS.ev && (

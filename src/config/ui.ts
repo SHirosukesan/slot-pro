@@ -7,6 +7,7 @@
 /** 一覧カードに出す項目 */
 export const LIST_ITEMS = {
   aim: true, // 狙い目
+  range: true, // 推奨範囲（期待値の上）
   ev: true, // 期待値
   ceiling: false, // 通常天井
 } as const;
