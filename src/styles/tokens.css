@@ -30,7 +30,7 @@
   --r-card: 18px;
   --sp-card: 14px;
   --sp-gutter: 16px;
-  --thumb: 88px;
+  --thumb: 100px; /* 一覧の機種画像の幅（高さはカードに合わせて伸びる） */
   --fs-big: 54px;
   --fs-detail-big: 64px;
 }

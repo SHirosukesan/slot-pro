@@ -19,11 +19,12 @@ export const UserImageContext = createContext<Record<string, string>>({});
  * 機種画像。優先順: 端末で設定した画像 → データの image.src → テーマ画像 → 頭文字の代替表示。
  * 枠線は内側に重ねるので、どの画像でも外寸は size×size で揃う。
  */
-export const Thumb = ({ m, size = 'var(--thumb)', rounded = 14, bare = false }: { m: Machine; size?: string; rounded?: number; bare?: boolean }) => {
+export const Thumb = ({ m, size = 'var(--thumb)', height, rounded = 14, bare = false }: { m: Machine; size?: string; height?: string; rounded?: number; bare?: boolean }) => {
   const [broken, setBroken] = useState(false);
   const userImages = useContext(UserImageContext);
   const src = userImages[m.machineId] ?? m.image.src;
-  const box = { width: size, height: size, borderRadius: rounded, flex: 'none' } as const;
+  // height を渡すと縦に伸ばせる（カードの高さに合わせる時は '100%'）
+  const box = { width: size, height: height ?? size, borderRadius: rounded, flex: 'none' } as const;
   const ring = bare ? null : <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" style={{ borderRadius: rounded }} aria-hidden />;
 
   let body: ReactNode;

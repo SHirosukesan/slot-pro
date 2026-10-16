@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronRight, Pencil, Search, Settings, Star, Target } from 'lucide-react';
+import { Pencil, Search, Settings, Star, Target } from 'lucide-react';
 import type { Machine, ResetState } from '../types/machine';
 import { MACHINES } from '../data/machines';
 import { searchMachines } from '../lib/search';
@@ -92,13 +92,13 @@ export function QuickJudge({
           return (
             <li key={m.machineId} className="card overflow-hidden">
               <div className="flex gap-3 p-card">
-                <button onClick={() => onOpen(m.machineId)} aria-label={`${m.shortName}の詳細`} className="block shrink-0 self-start rounded-[14px]">
-                  <Thumb m={m} />
+                <button onClick={() => onOpen(m.machineId)} aria-label={`${m.shortName}の詳細`} className="flex shrink-0 self-stretch rounded-[14px]">
+                  <Thumb m={m} height="100%" />
                 </button>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <button onClick={() => onOpen(m.machineId)} className="text-left min-w-0 flex items-center gap-1.5">
-                      <span className="text-[19px] font-bold leading-tight">{m.shortName}</span>
+                      <span className={`${m.shortName.length > 6 ? 'text-[16px]' : 'text-[18px]'} font-bold leading-tight line-clamp-2`}>{m.shortName}</span>
                       {fav && <Star size={14} className="text-gold shrink-0" fill="currentColor" aria-label="お気に入り" />}
                     </button>
                     <StatePill state={j.state} label={j.label} />
@@ -146,9 +146,6 @@ export function QuickJudge({
                     )}
                   </div>
                 </div>
-                <button onClick={() => onOpen(m.machineId)} aria-label={`${m.shortName}の詳細`} className="self-center text-dim -mr-1">
-                  <ChevronRight size={24} />
-                </button>
               </div>
 
               {morning && (

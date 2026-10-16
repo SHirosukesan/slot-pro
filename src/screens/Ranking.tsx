@@ -129,7 +129,9 @@ function RankRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number;
           {top && <Crown size={22} className={CROWN[rank - 1]} fill="currentColor" aria-hidden />}
           <span className={`num text-[26px] font-extrabold italic leading-none ${top ? CROWN[rank - 1] : 'text-sub'}`}>{rank}</span>
         </div>
-        <Thumb m={m} size="56px" rounded={10} />
+        <span className="flex self-stretch shrink-0">
+          <Thumb m={m} size="68px" height="100%" rounded={10} />
+        </span>
         <div className="flex-1 min-w-0">
           <div className="font-bold text-[16px] leading-tight truncate">{m.shortName}</div>
           <div className="text-[11px] text-sub">現在</div>
