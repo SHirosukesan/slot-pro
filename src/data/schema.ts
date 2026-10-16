@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 /** 機種データの形式検証（Zod）。テストとCIで全機種をチェックする */
 const status = z.enum(['verified', 'single', 'needsReview', 'unverified', 'na', 'sample']);
-const unit = z.enum(['G', '液晶G', 'あべし', 'pt', '周期', '回', '枚', '円']);
+const unit = z.enum(['G', '液晶G', '喰', 'あべし', 'pt', '周期', '回', '枚', '円']);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const source = z.object({ site: z.string().min(1), url: z.string().url(), referencedAt: date });
 const sourced = { status, sources: z.array(source), checkedAt: date.optional(), note: z.string().optional() };

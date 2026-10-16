@@ -1,7 +1,7 @@
 import { MACHINES, machineById } from '../data/machines';
 import { tokyoGhoul } from '../data/machines/tokyoGhoul';
 import { searchMachines } from '../lib/search';
-import { counterKey, hasAim, judge } from '../lib/judge';
+import { counterKey, counterName, distanceTo, hasAim, judge } from '../lib/judge';
 import { fmtCheckCount, fmtEvRange, fmtRange, numText } from '../lib/format';
 import { remainingNet } from '../lib/advantage';
 import { rankSlots } from '../lib/ranking';
@@ -54,6 +54,26 @@ describe('通常天井と朝一天井の区別', () => {
     const m = clone(tokyoGhoul);
     m.entryRules[0]!.status = 'unverified';
     expect(judge(m, 900, false, '不明').state).toBe('unknown');
+  });
+});
+
+describe('機種ごとの数え方の単位', () => {
+  it('東京喰種は喰、北斗はあべし、それ以外はG', () => {
+    expect(judge(tokyoGhoul, 600, false, '不明').unit).toBe('喰');
+    expect(judge(machineById('slot.smart.hokuto-no-ken.v1')!, 600, false, '不明').unit).toBe('あべし');
+    expect(judge(machineById('slot.smart.valvrave.v1')!, 600, false, '不明').unit).toBe('G');
+  });
+  it('CZ狙いはCZの単位（東京喰種のCZはG）', () => {
+    expect(judge(tokyoGhoul, 100, false, '不明', 'CZ').unit).toBe('G');
+  });
+  it('呼び名: G→ゲーム数、それ以外は単位そのまま', () => {
+    expect(counterName('G')).toBe('ゲーム数');
+    expect(counterName('喰')).toBe('喰');
+    expect(counterName('あべし')).toBe('あべし');
+  });
+  it('単位が違う天井とは距離を計算しない', () => {
+    expect(distanceTo(num(999, 'G'), 500, 'あべし')).toBeNull();
+    expect(distanceTo(num(999, 'あべし'), 500, 'あべし')).toBe(499);
   });
 });
 
@@ -178,7 +198,7 @@ describe('期待値ランキング', () => {
 
 describe('データ検証', () => {
   it('9999G のような値は警告するが書き換えない', () => {
-    const m = clone(tokyoGhoul);
+    const m = clone(machineById('slot.smart.valvrave.v1')!);
     m.ceilingRules.normal.value = 9999;
     expect(dataWarnings(m).some((w) => w.field === 'ceilingRules.normal')).toBe(true);
     expect(m.ceilingRules.normal.value).toBe(9999);

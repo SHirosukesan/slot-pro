@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Pencil, Search, Settings, Star, Target } from 'lucide-react';
-import type { AimType, Machine, ResetState } from '../types/machine';
+import type { AimType, Machine, ResetState, Unit } from '../types/machine';
 import { MACHINES } from '../data/machines';
 import { searchMachines } from '../lib/search';
-import { counterKey, distanceTo, hasAim, judge, pickCeiling } from '../lib/judge';
+import { counterKey, counterName, distanceTo, hasAim, judge, pickCeiling } from '../lib/judge';
 import { fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
 import { LIST_ITEMS } from '../config/ui';
 import type { AppState } from '../state/useAppState';
@@ -33,7 +33,7 @@ export function QuickJudge({
 }) {
   const [query, setQuery] = useState('');
   const [favOnly, setFavOnly] = useState(false);
-  const [editing, setEditing] = useState<{ m: Machine; key: string } | null>(null);
+  const [editing, setEditing] = useState<{ m: Machine; key: string; unit: Unit } | null>(null);
   const morning = mode === '朝イチ';
 
   const list = useMemo(() => {
@@ -122,14 +122,14 @@ export function QuickJudge({
                   </div>
 
                   <button
-                    onClick={() => setEditing({ m, key })}
+                    onClick={() => setEditing({ m, key, unit: j.unit })}
                     className="group flex items-baseline gap-1 mt-0.5"
-                    aria-label={`${m.shortName}の現在${aim === 'CZ' && !morning ? 'CZ' : ''}${m.counterUnit}数を入力`}
+                    aria-label={`${m.shortName}の現在${aim === 'CZ' && !morning ? 'CZ' : ''}${counterName(j.unit)}を入力`}
                   >
                     <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-big)' }}>
                       {cur == null ? '---' : fmtNum(cur)}
                     </span>
-                    <span className={`num text-[22px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{m.counterUnit}</span>
+                    <span className={`num text-[22px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{j.unit}</span>
                     <Pencil size={15} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
                   </button>
 
@@ -224,8 +224,8 @@ export function QuickJudge({
       <NumberSheet
         open={editing != null}
         onClose={() => setEditing(null)}
-        title={editing ? `${editing.m.shortName} 現在の${editing.key.endsWith('#cz') ? 'CZ' : ''}${editing.m.counterUnit}数` : ''}
-        unit={editing?.m.counterUnit ?? 'G'}
+        title={editing ? `${editing.m.shortName} 現在の${editing.key.endsWith('#cz') ? 'CZ' : ''}${counterName(editing.unit)}` : ''}
+        unit={editing?.unit ?? 'G'}
         value={editing ? (app.counters[editing.key] ?? null) : null}
         onSave={(v) => editing && app.setCounter(editing.key, v)}
       />
@@ -237,11 +237,13 @@ export function QuickJudge({
 function MorningCz({ m, reset, current }: { m: Machine; reset: ResetState; current: number | null }) {
   const morningApplied = reset === 'リセット';
   const c = pickCeiling(m, 'CZ', morningApplied);
-  const d = distanceTo(c, current);
+  // 朝イチの現在値は天井側の単位で数えているので、単位が同じ時だけ引き算する
+  const d = distanceTo(c, current, judge(m, current, true, reset, '天井').unit);
   const name = morningApplied && c === m.ceilingRules.czMorning ? '朝一CZ天井' : 'CZ天井';
   return (
     <span>
       {name} <b className="num text-accent">{c ? numText(c) : '未確認'}</b>
+      {d == null && c?.value != null && <span className="text-dim ml-1">（単位が違うため距離は出しません）</span>}
       {d != null && <b className={`num ml-1 ${d === 0 ? 'text-prio' : 'text-fg'}`}>（{d === 0 ? '到達' : `あと${fmtNum(d)}G`}）</b>}
     </span>
   );

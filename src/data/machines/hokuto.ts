@@ -13,13 +13,13 @@ export const hokuto: Machine = {
   manufacturer: null,
   image: { src: null, credit: null, license: '未確認' },
   hue: 28,
-  counterUnit: 'G',
+  counterUnit: 'あべし',
   entryRules: [
     {
       id: 'normal',
       aim: '天井',
       condition: '通常',
-      unit: 'G',
+      unit: 'あべし',
       minLine: 600,
       recommended: { min: 600, max: 800 },
       ev: { min: 3000, max: 9000, condition: EV },
@@ -28,8 +28,8 @@ export const hokuto: Machine = {
     },
   ],
   ceilingRules: {
-    normal: num(1268, 'G'),
-    morning: num(null, 'G', 'unverified'),
+    normal: num(1268, 'あべし'),
+    morning: num(null, 'あべし', 'unverified'),
     benefit: text('ボーナス当選'),
   },
   quitRules: [

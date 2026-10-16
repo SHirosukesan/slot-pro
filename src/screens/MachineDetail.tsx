@@ -15,7 +15,7 @@ import {
   Repeat,
 } from 'lucide-react';
 import type { AimType, ExternalLink as XLink, Machine, ResetState } from '../types/machine';
-import { counterKey, hasAim, judge } from '../lib/judge';
+import { counterKey, counterName, hasAim, judge } from '../lib/judge';
 import { fileToThumb, isImageFile } from '../lib/image';
 import { remainingNet } from '../lib/advantage';
 import { fmtCheckCount, fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
@@ -155,7 +155,7 @@ export function MachineDetail({
           <div className="flex items-center justify-between gap-2">
             <span className="text-[14px] text-sub">
               現在の{aim === 'CZ' && !morning ? 'CZ' : ''}
-              {m.counterUnit === 'G' ? 'ゲーム数' : m.counterUnit}
+              {counterName(j.unit)}
             </span>
             <StatePill state={j.state} label={j.state === 'go' ? '今打てる' : j.label} big />
           </div>
@@ -163,7 +163,7 @@ export function MachineDetail({
             <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-detail-big)' }}>
               {cur == null ? '---' : fmtNum(cur)}
             </span>
-            <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{m.counterUnit}</span>
+            <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{j.unit}</span>
             <Pencil size={16} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
           </button>
           {j.distance != null && (
@@ -360,8 +360,8 @@ export function MachineDetail({
       <NumberSheet
         open={sheet === 'count'}
         onClose={() => setSheet(null)}
-        title={`現在の${m.counterUnit}数`}
-        unit={m.counterUnit}
+        title={`現在の${aim === 'CZ' && !morning ? 'CZ' : ''}${counterName(j.unit)}`}
+        unit={j.unit}
         value={cur}
         onSave={(v) => app.setCounter(key, v)}
       />
@@ -436,7 +436,11 @@ const Stat = ({ label, value, icon, tone = 'text-fg' }: { label: string; value: 
       {icon}
       {label}
     </div>
-    <div className={`num font-extrabold leading-tight mt-1 ${value === '未確認' ? 'text-sub text-[18px]' : `${tone} text-[22px]`}`}>{value}</div>
+    <div
+      className={`num font-extrabold leading-tight mt-1 whitespace-nowrap ${value === '未確認' ? 'text-sub text-[18px]' : `${tone} ${value.length > 9 ? 'text-[17px]' : 'text-[22px]'}`}`}
+    >
+      {value}
+    </div>
   </div>
 );
 

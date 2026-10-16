@@ -1,4 +1,4 @@
-import type { AimType, EntryRule, Machine, NumValue, ResetState } from '../types/machine';
+import type { AimType, EntryRule, Machine, NumValue, ResetState, Unit } from '../types/machine';
 import { isUsable } from './format';
 
 export type JudgeState = 'go' | 'near' | 'prio' | 'skip' | 'unknown';
@@ -12,6 +12,8 @@ export interface JudgeResult {
   ceiling: NumValue | null;
   /** 天井まであと何G。出せなければ null */
   distance: number | null;
+  /** 現在値を数える単位（G・喰・あべし など） */
+  unit: Unit;
   /** 朝イチ表示中か（リセット時のみ朝イチ狙い目・朝一天井を使う） */
   morningApplied: boolean;
 }
@@ -32,8 +34,10 @@ export const hasAim = (m: Machine, aim: AimType): boolean =>
   aim === '天井' ? true : m.ceilingRules.cz != null || m.entryRules.some((r) => r.aim === 'CZ');
 
 /** 天井までの残り。天井・現在値のどちらかが不明なら null。到達済みは 0 */
-export const distanceTo = (ceiling: NumValue | null | undefined, current: number | null): number | null => {
+export const distanceTo = (ceiling: NumValue | null | undefined, current: number | null, unit?: Unit): number | null => {
   if (!ceiling || ceiling.value == null || !isUsable(ceiling.status) || current == null) return null;
+  // 単位が違う（例: 天井はG、現在値はあべし）なら引き算しない
+  if (unit && ceiling.unit !== unit) return null;
   return Math.max(0, ceiling.value - current);
 };
 
@@ -64,7 +68,8 @@ export const judge = (m: Machine, current: number | null, morning: boolean, rese
   const morningApplied = morning && reset === 'リセット';
   const rule = pickRule(m, aim, morningApplied);
   const ceiling = pickCeiling(m, aim, morningApplied);
-  const base = { aim, rule, ceiling, morningApplied, distance: distanceTo(ceiling, current) };
+  const unit = rule?.unit ?? ceiling?.unit ?? m.counterUnit;
+  const base = { aim, rule, ceiling, unit, morningApplied, distance: distanceTo(ceiling, current, unit) };
 
   if (!rule || rule.minLine == null || !isUsable(rule.status)) return { ...base, state: 'unknown', label: STATE_LABEL.unknown };
   if (current == null) return { ...base, state: 'skip', label: '未入力' };
@@ -82,3 +87,6 @@ export const judge = (m: Machine, current: number | null, morning: boolean, rese
  */
 export const counterKey = (machineId: string, aim: AimType, morning: boolean): string =>
   aim === 'CZ' && !morning ? `${machineId}#cz` : machineId;
+
+/** 「ゲーム数」「喰」「あべし」など、現在値の呼び名 */
+export const counterName = (unit: Unit): string => (unit === 'G' || unit === '液晶G' ? 'ゲーム数' : unit);

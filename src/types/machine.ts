@@ -17,7 +17,8 @@ export type VerificationStatus =
 export type Certainty = '確定' | '示唆' | '推測' | '未確認';
 
 /** 対応単位 */
-export type Unit = 'G' | '液晶G' | 'あべし' | 'pt' | '周期' | '回' | '枚' | '円';
+/** 対応単位。当たりまでを数える単位は機種ごとに違う（G・喰・あべし・pt など） */
+export type Unit = 'G' | '液晶G' | '喰' | 'あべし' | 'pt' | '周期' | '回' | '枚' | '円';
 
 export type MachineType = 'pachislot' | 'pachinko';
 
@@ -224,7 +225,7 @@ export interface Machine {
   image: MachineImage;
   /** 代替表示用の色相 (0-360) */
   hue: number;
-  /** 一覧のカウンター単位（現在G数等の入力単位） */
+  /** 当たりまでを数える単位の既定値。狙い目ルールに単位があればそちらを優先 */
   counterUnit: Unit;
   entryRules: EntryRule[];
   ceilingRules: CeilingRules;

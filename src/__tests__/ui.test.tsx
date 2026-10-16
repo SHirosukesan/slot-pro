@@ -33,7 +33,7 @@ describe('画面', () => {
   it('クイック判定に5機種が出て、検索で絞り込める', () => {
     render(<App />);
     expect(screen.getByText('東京喰種')).toBeInTheDocument();
-    expect(screen.getByText('550〜650G')).toBeInTheDocument();
+    expect(screen.getByText('550〜650喰')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('機種名で検索'), { target: { value: 'ほくと' } });
     expect(screen.queryByText('東京喰種')).not.toBeInTheDocument();
     expect(screen.getByText('北斗')).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('画面', () => {
 
   it('現在G数を入力すると保存される', () => {
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: 'からくりサーカスの現在G数を入力' }));
+    fireEvent.click(screen.getByRole('button', { name: 'からくりサーカスの現在ゲーム数を入力' }));
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '350' } });
     fireEvent.click(screen.getByRole('button', { name: '決定' }));
     expect(JSON.parse(localStorage.getItem('slotpro:v1:counters')!)['slot.smart.karakuri-circus.v1']).toBe(350);
