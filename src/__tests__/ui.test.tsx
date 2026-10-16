@@ -61,11 +61,23 @@ describe('画面', () => {
   it('期待値順に順位外が表示される', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('tab', { name: '期待値順' }));
-    expect(screen.getByText('順位外')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /順位外 2台/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /順位外 \d+台/ }));
     expect(screen.getByText('条件不一致')).toBeInTheDocument();
+    // 上位5台は大きなカード、6位以降は1行
+    expect(screen.getByRole('list', { name: 'ランキング' }).children).toHaveLength(5);
+    expect(screen.getByRole('list', { name: '6位以下' }).children).toHaveLength(1);
     const values = screen.getAllByTestId('ev-value');
-    expect(values[0]).toHaveClass('text-go');
+    expect(values[0]).toHaveClass('text-ev');
     expect(values[values.length - 1]).toHaveClass('text-prio');
     expect(values[values.length - 1]).toHaveTextContent('−1,200円');
+  });
+
+  it('条件に合う期待値がなければ基準に戻すボタンを出す', () => {
+    localStorage.setItem('slotpro:v1:evBase', JSON.stringify({ exchangeRate: 5, play: '現金', quitAssumption: '機種別やめどき', closingConsidered: false }));
+    render(<App />);
+    fireEvent.click(screen.getByRole('tab', { name: '期待値順' }));
+    fireEvent.click(screen.getByRole('button', { name: /に戻す/ }));
+    expect(screen.getByRole('list', { name: 'ランキング' }).children).toHaveLength(5);
   });
 });

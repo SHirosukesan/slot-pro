@@ -1,18 +1,26 @@
 import { useState } from 'react';
-import { Crown, Info, Settings } from 'lucide-react';
+import { ChevronDown, Crown, Info, Settings } from 'lucide-react';
 import { machineById } from '../data/machines';
 import { SAMPLE_SLOTS } from '../data/sampleSlots';
+import { SAMPLE_EV_CONDITION } from '../data/helpers';
+import { RANKING_TOP } from '../config/ui';
 import { rankSlots, type Excluded, type RankedSlot } from '../lib/ranking';
 import { fmtNum } from '../lib/format';
 import type { AppState } from '../state/useAppState';
 import { Logo, Segmented, Thumb } from '../components/ui';
 
-const CROWN = ['text-gold', 'text-[#c9ccd8]', 'text-[#d79a5c]'];
+/** 1〜3位の王冠：金・銀・銅 */
+const CROWN = ['text-gold', 'text-silver', 'text-bronze'];
 
 export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (id: string) => void; onSettings: () => void }) {
   const [sortBy, setSortBy] = useState<'期待値' | '時給'>('期待値');
   const [showInfo, setShowInfo] = useState(false);
+  const [showExcluded, setShowExcluded] = useState(false);
   const { ranked, excluded, hourlyAvailable, sortedBy } = rankSlots(SAMPLE_SLOTS, app.evBase, sortBy === '時給' ? 'hourly' : 'ev');
+  const showHourly = sortedBy === 'hourly';
+  // 上位は大きなカード、それ以降は1行で順番だけ
+  const top = ranked.slice(0, RANKING_TOP);
+  const rest = ranked.slice(RANKING_TOP);
 
   return (
     <div className="flex flex-col gap-4">
@@ -49,18 +57,51 @@ export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (i
         </div>
       </div>
 
-      <ol className="flex flex-col gap-2.5">
-        {ranked.map((s, i) => (
-          <RankRow key={s.id} s={s} rank={i + 1} showHourly={sortedBy === 'hourly'} onOpen={onOpen} />
-        ))}
-      </ol>
+      {ranked.length === 0 ? (
+        <div className="card p-5 text-center flex flex-col items-center gap-3">
+          <p className="text-[14px] text-sub">
+            {app.evBase.exchangeRate}枚・{app.evBase.play} で計算された期待値がありません。
+          </p>
+          <button
+            onClick={() => app.setEvBase(SAMPLE_EV_CONDITION)}
+            className="rounded-pill bg-accent px-4 py-2 text-[14px] font-bold text-white"
+          >
+            {SAMPLE_EV_CONDITION.exchangeRate}枚・{SAMPLE_EV_CONDITION.play} に戻す
+          </button>
+        </div>
+      ) : (
+        <ol className="flex flex-col gap-2.5" aria-label="ランキング">
+          {top.map((s, i) => (
+            <RankRow key={s.id} s={s} rank={i + 1} showHourly={showHourly} onOpen={onOpen} />
+          ))}
+        </ol>
+      )}
+
+      {rest.length > 0 && (
+        <ol className="card divide-y divide-line" start={RANKING_TOP + 1} aria-label={`${RANKING_TOP + 1}位以下`}>
+          {rest.map((s, i) => (
+            <CompactRow key={s.id} s={s} rank={RANKING_TOP + 1 + i} showHourly={showHourly} onOpen={onOpen} />
+          ))}
+        </ol>
+      )}
 
       {excluded.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-[14px] font-bold text-sub mt-1">順位外</h2>
-          {excluded.map((e) => (
-            <ExcludedRow key={e.slot.id} e={e} onOpen={onOpen} />
-          ))}
+        <section className="card">
+          <button
+            onClick={() => setShowExcluded((v) => !v)}
+            aria-expanded={showExcluded}
+            className="w-full flex items-center justify-between px-card py-3 text-[14px] font-bold text-sub"
+          >
+            順位外 {excluded.length}台
+            <ChevronDown size={18} className={`transition-transform ${showExcluded ? 'rotate-180' : ''}`} aria-hidden />
+          </button>
+          {showExcluded && (
+            <div className="divide-y divide-line border-t border-line">
+              {excluded.map((e) => (
+                <ExcludedRow key={e.slot.id} e={e} onOpen={onOpen} />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -104,12 +145,36 @@ function RankRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number;
   );
 }
 
+function CompactRow({ s, rank, showHourly, onOpen }: { s: RankedSlot; rank: number; showHourly: boolean; onOpen: (id: string) => void }) {
+  const m = machineById(s.machineId);
+  if (!m) return null;
+  const v = showHourly ? (s.hourly ?? 0) : (s.ev ?? 0);
+  return (
+    <li>
+      <button onClick={() => onOpen(m.machineId)} className="w-full flex items-center gap-3 px-card py-2.5 text-left">
+        <span className="num w-6 text-center text-[18px] font-extrabold italic text-dim">{rank}</span>
+        <Thumb m={m} size="36px" rounded={8} />
+        <span className="flex-1 min-w-0">
+          <span className="block text-[15px] font-bold truncate">{m.shortName}</span>
+          <span className="num block text-[12px] text-sub">
+            {fmtNum(s.current)}
+            {s.unit}
+          </span>
+        </span>
+        <span className={`num text-[18px] font-extrabold whitespace-nowrap ${evTone(v)}`} data-testid="ev-value">
+          {signedYen(v)}
+        </span>
+      </button>
+    </li>
+  );
+}
+
 function ExcludedRow({ e, onOpen }: { e: Excluded; onOpen: (id: string) => void }) {
   const m = machineById(e.slot.machineId);
   if (!m) return null;
   return (
-    <button onClick={() => onOpen(m.machineId)} className="card w-full flex items-center gap-3 p-2.5 text-left opacity-80">
-      <Thumb m={m} size="44px" rounded={8} />
+    <button onClick={() => onOpen(m.machineId)} className="w-full flex items-center gap-3 px-card py-2.5 text-left">
+      <Thumb m={m} size="36px" rounded={8} />
       <div className="flex-1 min-w-0">
         <div className="font-bold text-[15px] truncate">{m.shortName}</div>
         <div className="num text-[13px] text-sub">
@@ -123,7 +188,7 @@ function ExcludedRow({ e, onOpen }: { e: Excluded; onOpen: (id: string) => void 
           {e.reason === '未算出' ? (
             '未算出'
           ) : (
-            <span className={(e.slot.ev ?? 0) < 0 ? 'text-prio' : ''}>
+            <span className={(e.slot.ev ?? 0) < 0 ? 'text-prio' : 'text-sub'}>
               {signedYen(e.slot.ev ?? 0)}（{e.slot.evCondition?.play}）
             </span>
           )}
@@ -133,11 +198,14 @@ function ExcludedRow({ e, onOpen }: { e: Excluded; onOpen: (id: string) => void 
   );
 }
 
-/** 「+2,300円」「−1,200円」。プラスは緑、マイナスは赤 */
+/** プラスは期待値グリーン、マイナスは赤 */
+const evTone = (n: number) => (n < 0 ? 'text-prio' : n > 0 ? 'text-ev' : 'text-sub');
+
+/** 「+2,300円」「−1,200円」 */
 const signedYen = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${fmtNum(Math.abs(n))}円`;
 
 function YenBig({ value }: { value: number }) {
-  const tone = value < 0 ? 'text-prio' : value > 0 ? 'text-go' : 'text-sub';
+  const tone = evTone(value);
   return (
     <div className={`num font-extrabold leading-none whitespace-nowrap ${tone}`} data-testid="ev-value">
       <span className="text-[26px]">
