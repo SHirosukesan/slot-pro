@@ -188,7 +188,7 @@ function ExcludedRow({ e, onOpen }: { e: Excluded; onOpen: (id: string) => void 
           {e.reason === '未算出' ? (
             '未算出'
           ) : (
-            <span className={(e.slot.ev ?? 0) < 0 ? 'text-prio' : 'text-sub'}>
+            <span className={`font-bold ${evTone(e.slot.ev ?? 0)}`} data-testid="ev-excluded">
               {signedYen(e.slot.ev ?? 0)}（{e.slot.evCondition?.play}）
             </span>
           )}

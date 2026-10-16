@@ -64,6 +64,7 @@ describe('画面', () => {
     expect(screen.getByRole('button', { name: /順位外 2台/ })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /順位外 \d+台/ }));
     expect(screen.getByText('条件不一致')).toBeInTheDocument();
+    expect(screen.getAllByTestId('ev-excluded')[0]).toHaveClass('text-ev');
     // 上位5台は大きなカード、6位以降は1行
     expect(screen.getByRole('list', { name: 'ランキング' }).children).toHaveLength(5);
     expect(screen.getByRole('list', { name: '6位以下' }).children).toHaveLength(1);
