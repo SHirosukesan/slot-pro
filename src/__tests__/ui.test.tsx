@@ -45,7 +45,10 @@ describe('画面', () => {
     expect(screen.getByText('有利区間', { selector: 'h2' })).toBeInTheDocument();
     expect(screen.getByText('+2,400枚')).toBeInTheDocument();
     expect(screen.getByText('+1,000枚')).toBeInTheDocument();
-    expect(screen.getByTestId('link-settei-missing')).toHaveTextContent('リンク未登録');
+    const settei = screen.getByRole('link', { name: /設定推測/ });
+    expect(settei).toHaveAttribute('href', 'https://nana-press.com/kaiseki/machine/889/27249/');
+    expect(settei).toHaveAttribute('target', '_blank');
+    expect(settei).toHaveAttribute('rel', 'noopener noreferrer');
     // スルーの仕組みがない機種には出さない
     expect(screen.queryByText('スルー天井')).not.toBeInTheDocument();
   });

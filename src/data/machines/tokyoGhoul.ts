@@ -75,10 +75,11 @@ export const tokyoGhoul: Machine = {
     benefit: text('上位AT'),
     detection: text('液晶の示唆'),
   },
+  // 外部攻略リンク（該当記事へ直接）。設定推測の中身はアプリに持たない
   sourceLinks: [
-    { kind: 'settei', site: null, url: null },
-    { kind: 'reset', site: null, url: null },
-    { kind: 'advantage', site: null, url: null },
+    { kind: 'settei', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/889/27249/', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/889/27253/', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/889/27254/', referencedAt: '2026-10-17' },
   ],
   verifiedAt: null,
   verificationStatus: 'sample',

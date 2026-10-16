@@ -63,10 +63,11 @@ export const monkeyTurnV: Machine = {
     benefit: unverifiedText(),
     detection: unverifiedText(),
   },
+  // 外部攻略リンク（該当記事へ直接）。設定推測の中身はアプリに持たない
   sourceLinks: [
-    { kind: 'settei', site: null, url: null },
-    { kind: 'reset', site: null, url: null },
-    { kind: 'advantage', site: null, url: null },
+    { kind: 'settei', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/644/18015/', referencedAt: '2026-10-17' },
+    { kind: 'reset', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/644/18025/', referencedAt: '2026-10-17' },
+    { kind: 'advantage', site: 'ななプレス', url: 'https://nana-press.com/kaiseki/machine/644/18028/', referencedAt: '2026-10-17' },
   ],
   verifiedAt: null,
   verificationStatus: 'sample',
