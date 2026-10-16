@@ -66,6 +66,8 @@ export const karakuri: Machine = {
     ceiling: sourcedNum(4, '回', [CH_kr, AL_kr], '4スルー後、次のCZでAT。サイトで4回/5回の書き方が食い違うため確認待ち', 'needsReview'),
     aimFrom: num(3, '回'),
   },
+  // AT駆け抜けの恩恵：ちょんぼりすたに記載なし（2026-10-17確認）
+  kakenukeRules: null,
   morningRules: {
     entry: null,
     resetBenefit: naText(),

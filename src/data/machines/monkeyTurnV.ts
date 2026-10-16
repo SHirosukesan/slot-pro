@@ -53,6 +53,8 @@ export const monkeyTurnV: Machine = {
     ceiling: sourcedNum(5, '回', [CH_mk], '5スルー後、6回目の優出モードでAT。出典1件のため確認待ち'),
     aimFrom: num(3, '回'),
   },
+  // AT駆け抜けの恩恵：ちょんぼりすたに記載なし（2026-10-17確認）
+  kakenukeRules: null,
   morningRules: {
     entry: null,
     resetBenefit: text('天井短縮'),

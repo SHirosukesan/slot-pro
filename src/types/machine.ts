@@ -134,6 +134,14 @@ export interface SkipRules {
   aimFrom: NumValue;
 }
 
+/** AT駆け抜け（単発・すぐ終了）時の扱い。情報がある機種だけ登録 */
+export interface KakenukeRule {
+  /** 何をもって駆け抜けとするか（機種ごとに違う） */
+  definition: string;
+  /** 駆け抜け後の恩恵・モード（短文） */
+  benefit: TextValue;
+}
+
 export interface CeilingRules {
   normal: NumValue;
   /** 「朝一天井」 リセット時の天井。仕組みが無ければ status: 'na' */
@@ -233,6 +241,8 @@ export interface Machine {
   precursorRules: PrecursorRule | null;
   zoneRules: ZoneRule[];
   skipRules: SkipRules | null;
+  /** AT駆け抜け時の恩恵。情報が無い機種は null（画面に出さない） */
+  kakenukeRules: KakenukeRule | null;
   morningRules: MorningRules;
   advantageousSectionRules: AdvantageousSectionRules;
   sourceLinks: ExternalLink[];

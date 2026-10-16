@@ -1,5 +1,5 @@
 import type { Machine } from '../../types/machine';
-import { SAMPLE_EV_CONDITION as EV, detect, num, sourcedNum, src, text } from '../helpers';
+import { SAMPLE_EV_CONDITION as EV, detect, num, sourcedNum, sourcedText, src, text } from '../helpers';
 
 /**
  * 天井（通常・朝一・CZ）とスルー天井は攻略サイト2つで照合した値（2026-10-17）。
@@ -79,6 +79,17 @@ export const tokyoGhoul: Machine = {
   ],
   // スルー天井：存在は確認されていない（ちょんぼりすた・DMMぱちタウンとも記載なし。実践では最大7スルーの例あり）
   skipRules: null,
+  kakenukeRules: {
+    definition: 'ATが喰種対決1戦目で終了（BITES・百足覚醒・隻眼の梟に入らず）',
+    benefit: sourcedText(
+      'モードB以上濃厚',
+      [
+        src('ちょんぼりすた', 'https://chonborista.com/slot/spiky/226073/'),
+        src('アルテマ', 'https://pachimo.altema.jp/ltokyoghoulmode'),
+      ],
+      '駆け抜け後のCZ当選時は約60%で次回チャンスモード以上。喰ポイントが貯まる場合あり',
+    ),
+  },
   morningRules: {
     entry: {
       id: 'morning',

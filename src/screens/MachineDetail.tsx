@@ -1,5 +1,6 @@
 import { useContext, useState, type ReactNode } from 'react';
 import {
+  Zap,
   BarChart3,
   Camera,
   ChevronLeft,
@@ -248,7 +249,17 @@ export function MachineDetail({
               show('resetDetect') &&
               m.morningRules.otherDetections.map((d) => <Row key={d.label} icon={<Search size={18} />} k={d.label} v={d.certainty} tone="text-near" />)}
             <Row icon={<Flag size={18} />} k="宵越し" v={m.morningRules.carryOver.text ?? missingText(m.morningRules.carryOver.status)} />
- {resetInfo && m.morningRules.limits.text && <Row icon={<Flag size={18} />} k="判別の限界" v={m.morningRules.limits.text} />}
+            {resetInfo && m.morningRules.limits.text && <Row icon={<Flag size={18} />} k="判別の限界" v={m.morningRules.limits.text} />}
+            {/* AT駆け抜け：リセット状態に関係なく出す（情報がある機種だけ） */}
+            {m.kakenukeRules && (
+              <Row
+                icon={<Zap size={18} />}
+                k="駆け抜け"
+                v={m.kakenukeRules.benefit.text ?? missingText(m.kakenukeRules.benefit.status)}
+                tone="text-go"
+                sub={[m.kakenukeRules.definition, m.kakenukeRules.benefit.note].filter(Boolean).join('。')}
+              />
+            )}
           </dl>
           {reset === '不明' && morning && (
             <p className="px-card pb-3 text-[12px] text-dim">「リセット」を選ぶと朝イチ狙い目・朝一天井で判定します。示唆・推測だけでリセット確定にはしません。</p>
@@ -461,13 +472,16 @@ const Tile = ({ label, value, sub, tone = 'text-fg' }: { label: string; value: s
   </div>
 );
 
-const Row = ({ icon, k, v, tone = 'text-fg' }: { icon: ReactNode; k: string; v: string; tone?: string }) => (
-  <div className="flex items-center gap-3 px-card py-3">
-    <span className="text-sub shrink-0" aria-hidden>
-      {icon}
-    </span>
-    <dt className="font-bold shrink-0">{k}</dt>
-    <dd className={`ml-auto text-right ${v === '未確認' || v === 'なし' ? 'text-sub' : tone}`}>{v}</dd>
+const Row = ({ icon, k, v, tone = 'text-fg', sub }: { icon: ReactNode; k: string; v: string; tone?: string; sub?: string }) => (
+  <div className="px-card py-3">
+    <div className="flex items-center gap-3">
+      <span className="text-sub shrink-0" aria-hidden>
+        {icon}
+      </span>
+      <dt className="font-bold shrink-0">{k}</dt>
+      <dd className={`ml-auto text-right ${v === '未確認' || v === 'なし' ? 'text-sub' : tone}`}>{v}</dd>
+    </div>
+    {sub && <p className="mt-1 pl-[30px] text-[12px] leading-snug text-dim">{sub}</p>}
   </div>
 );
 

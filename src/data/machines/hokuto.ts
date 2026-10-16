@@ -43,6 +43,8 @@ export const hokuto: Machine = {
   precursorRules: null,
   zoneRules: [],
   skipRules: null,
+  // AT駆け抜けの恩恵：ちょんぼりすたに記載なし（2026-10-17確認）
+  kakenukeRules: null,
   morningRules: {
     entry: null,
     resetBenefit: text('なし', 'sample'),

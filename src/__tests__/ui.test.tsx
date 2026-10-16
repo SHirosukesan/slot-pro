@@ -89,6 +89,17 @@ describe('画面', () => {
     expect(JSON.parse(localStorage.getItem('slotpro:v1:theme')!)).toBe('ライト');
   });
 
+  it('駆け抜けの恩恵は情報がある機種だけ出す（据え置きでも出す）', () => {
+    render(<App />);
+    fireEvent.click(screen.getAllByRole('button', { name: '東京喰種の詳細' })[0]!);
+    fireEvent.click(screen.getByRole('tab', { name: '据え置き' }));
+    expect(screen.getByText('駆け抜け')).toBeInTheDocument();
+    expect(screen.getByText('モードB以上濃厚')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '戻る' }));
+    fireEvent.click(screen.getAllByRole('button', { name: '北斗の詳細' })[0]!);
+    expect(screen.queryByText('駆け抜け')).not.toBeInTheDocument();
+  });
+
   it('現在G数を入力すると保存される', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'からくりサーカスの現在ゲーム数を入力' }));

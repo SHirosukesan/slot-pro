@@ -70,6 +70,8 @@ export const valvrave: Machine = {
     ceiling: sourcedNum(7, '回', [CH_vv, AL_vv], '7連続失敗で次のCZが成功（ボーナス）'),
     aimFrom: num(4, '回'),
   },
+  // AT駆け抜けの恩恵：ちょんぼりすたに記載なし（2026-10-17確認）
+  kakenukeRules: null,
   morningRules: {
     entry: {
       id: 'morning',

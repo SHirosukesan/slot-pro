@@ -74,3 +74,12 @@ export const sourcedNum = (value: number | null, unit: Unit, sources: SourceRef[
   checkedAt: '2026-10-17',
   ...(note ? { note } : {}),
 });
+
+/** 出典つきの短文 */
+export const sourcedText = (t: string, sources: SourceRef[], note?: string, status?: VerificationStatus): TextValue => ({
+  text: t,
+  status: status ?? (sources.length >= 2 ? 'verified' : 'needsReview'),
+  sources,
+  checkedAt: '2026-10-17',
+  ...(note ? { note } : {}),
+});

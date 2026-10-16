@@ -58,6 +58,7 @@ export const machineSchema = z.object({
     .nullable(),
   zoneRules: z.array(z.object({ ...sourced, id: z.string(), label: z.string(), min: n, max: n, unit })),
   skipRules: z.object({ definition: z.string().min(1), ceiling: numVal, aimFrom: numVal }).nullable(),
+  kakenukeRules: z.object({ definition: z.string().min(1), benefit: textVal }).nullable(),
   morningRules: z.object({
     entry: entry.nullable(),
     resetBenefit: textVal,
