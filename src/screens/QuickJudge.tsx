@@ -107,6 +107,8 @@ export function QuickJudge({
           const ceilName = `${j.morningApplied ? '朝一' : ''}${AIM_LABEL[aim]}`;
           // 大きく出す数字：天井狙い＝現在G数、CZ狙い＝CZまでの残りG数
           const big = aim === 'CZ' ? j.distance : cur;
+          // CZ狙いで現在G数が未入力なら、CZ天井そのものを出しておく（入力すると残りに変わる）
+          const showCzCeiling = aim === 'CZ' && cur == null && j.ceiling?.value != null;
           const aimName = `${j.morningApplied ? '朝イチ' : ''}${aim === 'CZ' ? 'CZ' : ''}狙い目`;
           return (
             <li key={m.machineId} className="card overflow-hidden">
@@ -129,11 +131,16 @@ export function QuickJudge({
                     aria-label={`${m.shortName}の現在${aim === 'CZ' && !morning ? 'CZ' : ''}${counterName(j.unit)}を入力`}
                   >
                     {/* CZ狙いは「CZまであと何G」を大きく出す（入力するのは現在G数） */}
-                    {aim === 'CZ' && <span className="self-center text-[13px] font-bold text-sub mr-0.5">CZまで</span>}
-                    <span className={`num font-extrabold leading-none ${big == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-big)' }}>
-                      {big == null ? '---' : fmtNum(big)}
+                    {aim === 'CZ' && (
+                      <span className="self-center text-[13px] font-bold text-sub mr-0.5">{showCzCeiling ? ceilName : 'CZまで'}</span>
+                    )}
+                    <span
+                      className={`num font-extrabold leading-none ${showCzCeiling ? 'text-accent/70' : big == null ? 'text-dim' : stateText(j.state)}`}
+                      style={{ fontSize: 'var(--fs-big)' }}
+                    >
+                      {showCzCeiling ? fmtNum(j.ceiling!.value!) : big == null ? '---' : fmtNum(big)}
                     </span>
-                    <span className={`num text-[22px] font-bold ${big == null ? 'text-dim' : stateText(j.state)}`}>{unitText(j.unit)}</span>
+                    <span className={`num text-[22px] font-bold ${showCzCeiling ? 'text-accent/70' : big == null ? 'text-dim' : stateText(j.state)}`}>{unitText(j.unit)}</span>
                     <Pencil size={15} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
                   </button>
 
@@ -172,7 +179,7 @@ export function QuickJudge({
                       <div className="text-sub">
                         現在{' '}
                         <span className="num font-bold text-fg">{cur == null ? '未入力' : `${fmtNum(cur)}${unitText(j.unit)}`}</span>
-                        {j.ceiling?.value != null && !showCeiling && (
+                        {j.ceiling?.value != null && !showCeiling && !showCzCeiling && (
                           <span className="text-dim">
                             {' '}／ {ceilName} {fmtNum(j.ceiling.value)}
                             {unitText(j.ceiling.unit)}

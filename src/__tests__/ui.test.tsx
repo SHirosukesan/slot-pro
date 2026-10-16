@@ -78,6 +78,8 @@ describe('画面', () => {
     expect(screen.queryByText('北斗')).not.toBeInTheDocument();
     expect(screen.getByText('東京喰種')).toBeInTheDocument();
     expect(screen.getAllByText(/CZ狙い目/).length).toBeGreaterThan(0);
+    // 未入力ならCZ天井(600)をそのまま出す
+    expect(screen.getAllByText('600').length).toBeGreaterThan(0);
     // 現在200Gを入れると、大きな数字はCZ天井(600)までの残り400
     fireEvent.click(screen.getByRole('button', { name: '東京喰種の現在CZ液晶ゲーム数を入力' }));
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '200' } });
