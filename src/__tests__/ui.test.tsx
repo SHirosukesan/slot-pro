@@ -80,6 +80,15 @@ describe('画面', () => {
     expect(screen.getAllByText(/CZ狙い目/).length).toBeGreaterThan(0);
   });
 
+  it('設定でライト / ダークを切り替えて保存', () => {
+    render(<App />);
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    fireEvent.click(screen.getAllByRole('button', { name: '設定' })[0]!);
+    fireEvent.click(screen.getByRole('tab', { name: 'ライト' }));
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(JSON.parse(localStorage.getItem('slotpro:v1:theme')!)).toBe('ライト');
+  });
+
   it('現在G数を入力すると保存される', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'からくりサーカスの現在ゲーム数を入力' }));

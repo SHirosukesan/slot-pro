@@ -57,7 +57,7 @@ export function Ranking({ app, onOpen, onSettings }: { app: AppState; onOpen: (i
         <span className="rounded-pill bg-accent-soft text-accent px-3 py-1 font-bold whitespace-nowrap">
           {app.evBase.exchangeRate}枚・{app.evBase.play}
         </span>
-        <span className="rounded-pill bg-white/10 text-sub px-3 py-1 font-bold whitespace-nowrap">表示サンプル</span>
+        <span className="rounded-pill bg-fg/10 text-sub px-3 py-1 font-bold whitespace-nowrap">表示サンプル</span>
         <div className="ml-auto w-[136px]">
           <Segmented<'期待値' | '時給'> size="sm" label="並び順" value={hourlyAvailable ? sortBy : '期待値'} options={['期待値', '時給']} onChange={setSortBy} />
         </div>

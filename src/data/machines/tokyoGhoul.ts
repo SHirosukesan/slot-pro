@@ -77,6 +77,7 @@ export const tokyoGhoul: Machine = {
     { id: 'z1', label: 'ざわつき', min: 100, max: 100, unit: 'G', status: 'sample', sources: [] },
     { id: 'z2', label: 'ざわつき', min: 250, max: 250, unit: 'G', status: 'sample', sources: [] },
   ],
+  // スルー天井：存在は確認されていない（ちょんぼりすた・DMMぱちタウンとも記載なし。実践では最大7スルーの例あり）
   skipRules: null,
   morningRules: {
     entry: {

@@ -24,6 +24,19 @@ export default function App() {
     window.scrollTo({ top: 0 });
   }, [tab, detailId]);
 
+  // テーマ：ダーク / ライト / 自動（端末の設定に合わせる）
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-color-scheme: light)');
+    const apply = () => {
+      const light = app.theme === 'ライト' || (app.theme === '自動' && !!mq?.matches);
+      document.documentElement.dataset.theme = light ? 'light' : 'dark';
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f3f3f7' : '#0c0d11');
+    };
+    apply();
+    mq?.addEventListener?.('change', apply);
+    return () => mq?.removeEventListener?.('change', apply);
+  }, [app.theme]);
+
   // ブラウザの戻るで詳細を閉じる
   useEffect(() => {
     const onPop = () => setDetailId(null);

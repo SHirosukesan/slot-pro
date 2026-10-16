@@ -5,6 +5,8 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 
 // mode "singlefile" = 1ファイルのプレビュー用ビルド（PWAなし）
 export default defineConfig(({ mode }) => ({
+  // GitHub Pages（/slot-pro/ 配下）でも動くよう相対パスで出力
+  base: './',
   plugins: [
     react(),
     mode === 'singlefile'

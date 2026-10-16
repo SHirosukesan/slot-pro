@@ -36,3 +36,24 @@
   --fs-big: 54px;
   --fs-detail-big: 64px;
 }
+
+/* ライトモード（設定で切り替え。「自動」は端末の設定に合わせる） */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --c-bg: 243 243 247;
+  --c-surface: 255 255 255;
+  --c-raised: 236 237 243;
+  --c-line: 220 221 230;
+  --c-fg: 21 22 28;
+  --c-sub: 88 91 108;
+  --c-dim: 132 135 150;
+  --c-accent: 94 76 230;
+  --c-go: 18 150 80;
+  --c-near: 176 128 0;
+  --c-prio: 220 46 88;
+  --c-skip: 132 135 150;
+  --c-gold: 196 148 20;
+  --c-silver: 130 136 156;
+  --c-bronze: 176 108 52;
+  --c-ev: 16 146 84;
+}

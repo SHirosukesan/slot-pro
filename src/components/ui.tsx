@@ -25,7 +25,7 @@ export const Thumb = ({ m, size = 'var(--thumb)', height, rounded = 14, bare = f
   const src = userImages[m.machineId] ?? m.image.src;
   // height を渡すと縦に伸ばせる（カードの高さに合わせる時は '100%'）
   const box = { width: size, height: height ?? size, borderRadius: rounded, flex: 'none' } as const;
-  const ring = bare ? null : <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" style={{ borderRadius: rounded }} aria-hidden />;
+  const ring = bare ? null : <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-fg/10" style={{ borderRadius: rounded }} aria-hidden />;
 
   let body: ReactNode;
   if (src && !broken) {
@@ -86,9 +86,9 @@ const STATUS_CLS: Record<VerificationStatus, string> = {
   verified: 'text-go bg-go/10',
   single: 'text-accent bg-accent-soft',
   needsReview: 'text-near bg-near/10',
-  unverified: 'text-sub bg-white/5',
-  na: 'text-dim bg-white/5',
-  sample: 'text-sub bg-white/10',
+  unverified: 'text-sub bg-fg/5',
+  na: 'text-dim bg-fg/5',
+  sample: 'text-sub bg-fg/10',
 };
 
 export const StatusTag = ({ status }: { status: VerificationStatus }) => (

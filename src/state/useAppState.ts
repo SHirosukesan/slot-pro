@@ -18,6 +18,9 @@ const isImageRecord = (v: unknown): v is Record<string, string> =>
   typeof v === 'object' && v !== null && !Array.isArray(v) &&
   Object.values(v).every((x) => typeof x === 'string' && x.startsWith('data:image/'));
 
+export type ThemeSetting = 'ダーク' | 'ライト' | '自動';
+const isTheme = (v: unknown): v is ThemeSetting => v === 'ダーク' || v === 'ライト' || v === '自動';
+
 const isBoolRecord = (v: unknown): v is Record<string, boolean> =>
   typeof v === 'object' && v !== null && !Array.isArray(v) && Object.values(v).every((x) => typeof x === 'boolean');
 
@@ -38,6 +41,9 @@ export function useAppState() {
   const [nets, setNets] = usePersisted<Record<string, number>>('nets', {}, isNumberRecord);
   const [netStartKnown, setNetStartKnown] = usePersisted<Record<string, boolean>>('netStart', {}, isBoolRecord);
   const [evBase, setEvBase] = usePersisted<EvCondition>('evBase', SAMPLE_EV_CONDITION, isEvCondition);
+
+  /** 表示テーマ */
+  const [theme, setTheme] = usePersisted<ThemeSetting>('theme', 'ダーク', isTheme);
 
   /** 利用者が設定した機種画像（端末内のみ） */
   const [images, setImages] = usePersisted<Record<string, string>>('images', {}, isImageRecord);
@@ -84,6 +90,7 @@ export function useAppState() {
     netStartKnown, setStartKnown,
     evBase, setEvBase,
     images, setImage,
+    theme, setTheme,
   };
 }
 

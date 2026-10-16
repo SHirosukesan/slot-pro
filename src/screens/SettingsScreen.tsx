@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { AlertTriangle, ChevronLeft, Database, Smartphone, Trash2 } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, Database, Smartphone, SunMoon, Trash2 } from 'lucide-react';
 import { MACHINES } from '../data/machines';
 import { dataWarnings } from '../lib/validate';
 import { STATUS_LABEL } from '../lib/format';
 import { clearAll } from '../lib/storage';
 import { EXCHANGE_RATES } from '../config/ui';
-import type { AppState } from '../state/useAppState';
+import type { AppState, ThemeSetting } from '../state/useAppState';
 import { Segmented, Thumb } from '../components/ui';
 
 export function SettingsScreen({ app, onBack }: { app: AppState; onBack: () => void }) {
@@ -19,6 +19,14 @@ export function SettingsScreen({ app, onBack }: { app: AppState; onBack: () => v
         </button>
         <h1 className="text-[24px] font-black">設定</h1>
       </header>
+
+      <section className="card p-card flex flex-col gap-3">
+        <h2 className="font-bold flex items-center gap-2">
+          <SunMoon size={18} className="text-accent" /> 画面の明るさ
+        </h2>
+        <Segmented<ThemeSetting> label="画面の明るさ" value={app.theme} options={['ダーク', 'ライト', '自動']} onChange={app.setTheme} />
+        <p className="text-[12px] text-dim">「自動」は端末のダーク / ライト設定に合わせます。</p>
+      </section>
 
       <section className="card p-card flex flex-col gap-3">
         <h2 className="font-bold">期待値の比較条件</h2>
