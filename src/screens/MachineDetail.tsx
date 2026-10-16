@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useContext, useState, type ReactNode } from 'react';
 import {
   BarChart3,
   Camera,
@@ -21,7 +21,8 @@ import { remainingNet } from '../lib/advantage';
 import { fmtCheckCount, fmtEvRange, fmtNum, fmtRange, missingText, numText } from '../lib/format';
 import { DETAIL_ORDER, type DetailKey } from '../config/ui';
 import type { AppState } from '../state/useAppState';
-import { Logo, NumberSheet, Segmented, StatePill, StatusTag, Thumb, stateText } from '../components/ui';
+import { MachineArt, hasArt } from '../components/art';
+import { UserImageContext, Logo, NumberSheet, Segmented, StatePill, StatusTag, stateText } from '../components/ui';
 
 const RESETS: readonly ResetState[] = ['リセット', '据え置き', '不明'];
 
@@ -85,11 +86,20 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
     <div className="flex flex-col gap-3 pb-2">
       {/* ヒーロー */}
       <div className="relative -mx-gutter overflow-hidden">
-        <div className="absolute inset-0 opacity-70 blur-2xl scale-125" aria-hidden>
-          <Thumb m={m} size="100%" rounded={0} />
+        {/* 色だけを敷く背景（ぼかし） */}
+        <div className="absolute inset-0 scale-150 blur-2xl opacity-60" aria-hidden>
+          <HeroArt m={m} />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-bg/30 via-bg/50 to-bg" aria-hidden />
-        <div className="relative px-gutter pt-2 pb-4">
+        {/* 右側に画像。左へ向けて溶かす */}
+        <div
+          className="absolute inset-y-0 right-0 w-[68%]"
+          style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, #000 38%)', maskImage: 'linear-gradient(to right, transparent, #000 38%)' }}
+          aria-hidden
+        >
+          <HeroArt m={m} />
+        </div>
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgb(var(--c-bg) / .35), transparent 35%, transparent 65%, rgb(var(--c-bg)))' }} aria-hidden />
+        <div className="relative px-gutter pt-2 pb-4 min-h-[210px] flex flex-col">
           <div className="flex items-center justify-between">
             <button onClick={onBack} aria-label="戻る" className="size-11 -ml-2 grid place-items-center text-fg">
               <ChevronLeft size={30} />
@@ -99,9 +109,9 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
               <Heart size={26} className={fav ? 'text-prio' : 'text-fg'} fill={fav ? 'currentColor' : 'none'} />
             </button>
           </div>
-          <div className="flex items-end gap-4 mt-3">
+          <div className="flex items-end gap-3 mt-auto pt-6">
             <div className="flex-1 min-w-0">
-              <h1 className="text-[32px] font-black leading-tight tracking-tight">{m.shortName}</h1>
+              <h1 className={`${m.shortName.length > 6 ? 'text-[26px]' : 'text-[32px]'} font-black leading-tight tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,.8)]`}>{m.shortName}</h1>
               <p className="text-[14px] text-fg/80">{m.officialName}</p>
             </div>
             <ImagePicker m={m} app={app} />
@@ -322,17 +332,28 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
   );
 }
 
+/** ヒーロー背景。端末の画像 → テーマ画像の順に、横長に切り抜いて敷く */
+function HeroArt({ m }: { m: Machine }) {
+  const userImages = useContext(UserImageContext);
+  const src = userImages[m.machineId] ?? m.image.src;
+  if (src) return <img src={src} alt="" className="size-full object-cover object-[center_25%]" />;
+  if (hasArt(m.machineId)) return <MachineArt machineId={m.machineId} label="" />;
+  return <div className="size-full" style={{ background: `linear-gradient(120deg, hsl(${m.hue} 60% 22%), rgb(var(--c-bg)))` }} />;
+}
+
 function ImagePicker({ m, app }: { m: Machine; app: AppState }) {
   const [error, setError] = useState<string | null>(null);
   const has = app.images[m.machineId] != null;
   const inputId = `image-${m.machineId}`;
   return (
-    <div className="flex flex-col items-center gap-1 shrink-0">
-      <label htmlFor={inputId} className="relative cursor-pointer" aria-label={`${m.shortName}の画像を${has ? '変更' : '設定'}`}>
-        <Thumb m={m} size="84px" />
-        <span className="absolute -bottom-1.5 -right-1.5 size-8 grid place-items-center rounded-full bg-accent text-white border-2 border-bg">
-          <Camera size={16} aria-hidden />
-        </span>
+    <div className="flex flex-col items-end gap-1 shrink-0">
+      <label
+        htmlFor={inputId}
+        className="cursor-pointer inline-flex items-center gap-1.5 rounded-pill bg-black/55 backdrop-blur px-3 py-1.5 text-[12px] font-bold text-white ring-1 ring-white/15"
+        aria-label={`${m.shortName}の画像を${has ? '変更' : '設定'}`}
+      >
+        <Camera size={15} aria-hidden />
+        {has ? '画像を変更' : '画像を設定'}
       </label>
       <input
         id={inputId}
@@ -353,7 +374,7 @@ function ImagePicker({ m, app }: { m: Machine; app: AppState }) {
         }}
       />
       {has && (
-        <button onClick={() => app.setImage(m.machineId, null)} className="text-[11px] text-sub underline mt-1">
+        <button onClick={() => app.setImage(m.machineId, null)} className="text-[11px] text-fg/80 underline">
           画像を外す
         </button>
       )}

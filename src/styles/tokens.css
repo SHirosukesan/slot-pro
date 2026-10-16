@@ -1,24 +1,27 @@
-/* SLOT PRO デザイントークン — ここを変えるとアプリ全体に反映される */
+/*
+ * SLOT PRO デザイントークン — ここを変えるとアプリ全体に反映される。
+ * 色は「R G B」の3つの数字で書く（Tailwind の半透明指定 bg-go/10 などを効かせるため）。
+ * CSS で直接使う時は rgb(var(--c-bg)) のように書く。
+ */
 :root {
   color-scheme: dark;
   /* 背景・面 */
-  --c-bg: #0c0d11;
-  --c-surface: #16171d;
-  --c-raised: #1e1f27;
-  --c-line: #2a2b35;
+  --c-bg: 12 13 17;
+  --c-surface: 22 23 29;
+  --c-raised: 30 31 39;
+  --c-line: 42 43 53;
   /* 文字 */
-  --c-fg: #f4f4f7;
-  --c-sub: #a3a5b3;
-  --c-dim: #6c6e7c;
+  --c-fg: 244 244 247;
+  --c-sub: 163 165 179;
+  --c-dim: 108 110 124;
   /* アクセント（紫） */
-  --c-accent: #7b6cff;
-  --c-accent-soft: rgba(123, 108, 255, 0.16);
+  --c-accent: 123 108 255;
   /* 判定色（色だけに頼らずアイコン・文言も併用） */
-  --c-go: #4be38a;
-  --c-near: #f6d84a;
-  --c-prio: #ff5c7c;
-  --c-skip: #7d7f8c;
-  --c-gold: #f2c14e;
+  --c-go: 75 227 138;
+  --c-near: 246 216 74;
+  --c-prio: 255 92 124;
+  --c-skip: 125 127 140;
+  --c-gold: 242 193 78;
   /* 形 */
   --r-card: 18px;
   --sp-card: 14px;

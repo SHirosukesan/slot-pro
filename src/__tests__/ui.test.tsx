@@ -6,8 +6,11 @@ import { tokyoGhoul } from '../data/machines/tokyoGhoul';
 describe('画面', () => {
   beforeEach(() => localStorage.clear());
 
-  it('画像がない機種は代替表示', () => {
-    render(<Thumb m={tokyoGhoul} />);
+  it('画像がない機種はテーマ画像、テーマ画像もなければ頭文字の代替表示', () => {
+    const { unmount } = render(<Thumb m={tokyoGhoul} />);
+    expect(screen.getByTestId('thumb-art')).toBeInTheDocument();
+    unmount();
+    render(<Thumb m={{ ...tokyoGhoul, machineId: 'slot.smart.unknown.v1' }} />);
     expect(screen.getByTestId('thumb-fallback')).toBeInTheDocument();
   });
 
@@ -17,7 +20,7 @@ describe('画面', () => {
         <Thumb m={tokyoGhoul} />
       </UserImageContext.Provider>,
     );
-    expect(screen.queryByTestId('thumb-fallback')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('thumb-art')).not.toBeInTheDocument();
     expect(screen.getByRole('img', { name: '東京喰種' })).toHaveAttribute('src', 'data:image/png;base64,AAAA');
   });
 

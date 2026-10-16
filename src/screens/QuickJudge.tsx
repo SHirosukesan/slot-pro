@@ -92,7 +92,7 @@ export function QuickJudge({
           return (
             <li key={m.machineId} className="card overflow-hidden">
               <div className="flex gap-3 p-card">
-                <button onClick={() => onOpen(m.machineId)} aria-label={`${m.shortName}の詳細`} className="shrink-0 self-start">
+                <button onClick={() => onOpen(m.machineId)} aria-label={`${m.shortName}の詳細`} className="block shrink-0 self-start rounded-[14px]">
                   <Thumb m={m} />
                 </button>
                 <div className="flex-1 min-w-0">

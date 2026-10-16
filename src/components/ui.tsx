@@ -4,6 +4,7 @@ import type { Machine, VerificationStatus } from '../types/machine';
 import type { JudgeState } from '../lib/judge';
 import { STATUS_LABEL } from '../lib/format';
 import { STEP_BUTTONS } from '../config/ui';
+import { MachineArt, hasArt } from './art';
 
 export const Logo = ({ className = '' }: { className?: string }) => (
   <span className={`logo text-[26px] leading-none ${className}`} aria-label="SLOT PRO">
@@ -14,35 +15,47 @@ export const Logo = ({ className = '' }: { className?: string }) => (
 /** 利用者が端末で設定した画像（machineId → data URL）。データ側の image.src より優先 */
 export const UserImageContext = createContext<Record<string, string>>({});
 
-/** 機種画像。画像が未登録なら機種IDの色相で代替表示（キャラクター画像は使わない） */
-export const Thumb = ({ m, size = 'var(--thumb)', rounded = 14 }: { m: Machine; size?: string; rounded?: number }) => {
+/**
+ * 機種画像。優先順: 端末で設定した画像 → データの image.src → テーマ画像 → 頭文字の代替表示。
+ * 枠線は内側に重ねるので、どの画像でも外寸は size×size で揃う。
+ */
+export const Thumb = ({ m, size = 'var(--thumb)', rounded = 14, bare = false }: { m: Machine; size?: string; rounded?: number; bare?: boolean }) => {
   const [broken, setBroken] = useState(false);
   const userImages = useContext(UserImageContext);
   const src = userImages[m.machineId] ?? m.image.src;
-  const style = { width: size, height: size, borderRadius: rounded } as const;
+  const box = { width: size, height: size, borderRadius: rounded, flex: 'none' } as const;
+  const ring = bare ? null : <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" style={{ borderRadius: rounded }} aria-hidden />;
+
+  let body: ReactNode;
   if (src && !broken) {
-    return <img src={src} alt={m.shortName} style={style} className="object-cover shrink-0" onError={() => setBroken(true)} />;
-  }
-  const h = m.hue;
-  return (
-    <div
-      role="img"
-      aria-label={`${m.shortName}（画像未登録）`}
-      data-testid="thumb-fallback"
-      style={{
-        ...style,
-        background: `radial-gradient(120% 90% at 20% 10%, hsl(${h} 70% 42%) 0%, hsl(${h} 60% 18%) 55%, #0d0e13 100%)`,
-      }}
-      className="shrink-0 relative overflow-hidden grid place-items-center border border-white/10"
-    >
-      <div
-        className="absolute inset-0 opacity-40"
-        style={{ backgroundImage: `repeating-linear-gradient(135deg, hsl(${h} 80% 70% / .16) 0 2px, transparent 2px 9px)` }}
-      />
-      <span className="relative font-jp font-black text-white/95 drop-shadow" style={{ fontSize: `calc(${size} * 0.42)` }}>
-        {m.shortName.slice(0, 1)}
+    body = <img src={src} alt={m.shortName} className="block size-full object-cover" onError={() => setBroken(true)} />;
+  } else if (hasArt(m.machineId)) {
+    body = (
+      <span data-testid="thumb-art" className="block size-full">
+        <MachineArt machineId={m.machineId} label={m.shortName} />
       </span>
-    </div>
+    );
+  } else {
+    const h = m.hue;
+    body = (
+      <span
+        role="img"
+        aria-label={`${m.shortName}（画像未登録）`}
+        data-testid="thumb-fallback"
+        className="grid size-full place-items-center"
+        style={{ background: `radial-gradient(120% 90% at 20% 10%, hsl(${h} 70% 42%) 0%, hsl(${h} 60% 18%) 55%, #0d0e13 100%)` }}
+      >
+        <span className="font-jp font-black text-white/95 drop-shadow" style={{ fontSize: `calc(${size} * 0.42)` }}>
+          {m.shortName.slice(0, 1)}
+        </span>
+      </span>
+    );
+  }
+  return (
+    <span className="relative block overflow-hidden bg-raised" style={box}>
+      {body}
+      {ring}
+    </span>
   );
 };
 
@@ -104,7 +117,7 @@ export function Segmented<T extends string>({
             role="tab"
             aria-selected={on}
             onClick={() => onChange(o)}
-            className={`rounded-[12px] font-bold transition-colors ${size === 'md' ? 'py-2.5 text-[16px]' : 'py-1.5 text-[13px]'} ${on ? 'bg-accent text-white shadow-[0_4px_18px_-6px_var(--c-accent)]' : 'text-sub hover:text-fg'}`}
+            className={`rounded-[12px] font-bold transition-colors ${size === 'md' ? 'py-2.5 text-[16px]' : 'py-1.5 text-[13px]'} ${on ? 'bg-accent text-white shadow-[0_4px_18px_-6px_rgb(var(--c-accent))]' : 'text-sub hover:text-fg'}`}
           >
             {o}
           </button>

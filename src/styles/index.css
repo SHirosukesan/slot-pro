@@ -6,8 +6,8 @@
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: var(--c-bg);
-  color: var(--c-fg);
+  background: rgb(var(--c-bg));
+  color: rgb(var(--c-fg));
   font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -15,9 +15,9 @@ body {
 }
 .num { font-family: Outfit, 'Noto Sans JP', system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .logo { font-family: Outfit, sans-serif; font-weight: 800; font-style: italic; letter-spacing: 0.02em; transform: skewX(-8deg); display: inline-block; }
-.card { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-card); }
-.tile { background: var(--c-raised); border-radius: calc(var(--r-card) - 4px); }
-:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+.card { background: rgb(var(--c-surface)); border: 1px solid rgb(var(--c-line)); border-radius: var(--r-card); }
+.tile { background: rgb(var(--c-raised)); border-radius: calc(var(--r-card) - 4px); }
+:focus-visible { outline: 2px solid rgb(var(--c-accent)); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 .sheet-in { animation: sheetIn .22s cubic-bezier(.2,.8,.2,1); }
 @keyframes sheetIn { from { transform: translateY(24px); opacity: .4 } to { transform: none; opacity: 1 } }
