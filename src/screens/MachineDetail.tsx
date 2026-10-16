@@ -122,52 +122,56 @@ export function MachineDetail({ m, app, morning, onBack }: { m: Machine; app: Ap
         </div>
       </div>
 
-      {/* 現在のゲーム数 */}
-      <section className="card p-card">
-        <div className="flex items-start justify-between gap-2">
-          <span className="text-[14px] text-sub">現在の{m.counterUnit === 'G' ? 'ゲーム数' : m.counterUnit}</span>
-          <StatePill state={j.state} label={j.state === 'go' ? '今打てる' : j.label} big />
-        </div>
-        <button onClick={() => setSheet('count')} className="flex items-baseline gap-1 group" aria-label="現在値を入力">
-          <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-detail-big)' }}>
-            {cur == null ? '---' : fmtNum(cur)}
-          </span>
-          <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{m.counterUnit}</span>
-          <Pencil size={16} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
-        </button>
-        <div className="flex items-center gap-1.5 mt-1.5 text-[16px]">
-          <Target size={20} className="text-prio" aria-hidden />
-          <span>
-            {j.morningApplied ? '朝イチ狙い目' : '狙い目'}{' '}
-            <b className="num">{rule?.minLine != null ? `${fmtNum(rule.minLine)}${rule.unit}〜` : '未確認'}</b>
-          </span>
-        </div>
-      </section>
-
-      {/* 狙い目・期待値（最優先） */}
-      {(show('aim') || show('ev')) && (
-        <section className="card p-card">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[14px] text-sub">{j.morningApplied ? '朝イチ 推奨範囲' : '推奨範囲'}</span>
-            <span className="num text-[30px] font-extrabold text-go leading-none">
-              {rule?.recommended ? (fmtRange(rule.recommended.min, rule.recommended.max, rule.unit) ?? '未確認') : '未確認'}
+      {/* 現在のゲーム数＋狙い目・推奨範囲・期待値（最優先の情報を1枚にまとめる） */}
+      <section className="card overflow-hidden">
+        <div className="p-card pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[14px] text-sub">現在の{m.counterUnit === 'G' ? 'ゲーム数' : m.counterUnit}</span>
+            <StatePill state={j.state} label={j.state === 'go' ? '今打てる' : j.label} big />
+          </div>
+          <button onClick={() => setSheet('count')} className="flex items-baseline gap-1 group mt-1" aria-label="現在値を入力">
+            <span className={`num font-extrabold leading-none ${cur == null ? 'text-dim' : stateText(j.state)}`} style={{ fontSize: 'var(--fs-detail-big)' }}>
+              {cur == null ? '---' : fmtNum(cur)}
             </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2 mt-2.5">
-            <span className="text-[14px] text-sub">期待値</span>
-            <span className="num text-[24px] font-extrabold leading-none">{fmtEvRange(rule?.ev ?? null)}</span>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-dim">
-            {rule?.target && <span>確認対象：{rule.target}</span>}
-            {rule?.ev && (
-              <span>
-                前提：{rule.ev.condition.exchangeRate}枚・{rule.ev.condition.play}
-              </span>
-            )}
-            {rule && <StatusTag status={rule.status} />}
-          </div>
-        </section>
-      )}
+            <span className={`num text-[28px] font-bold ${cur == null ? 'text-dim' : stateText(j.state)}`}>{m.counterUnit}</span>
+            <Pencil size={16} className="ml-1 text-dim group-hover:text-sub self-center" aria-hidden />
+          </button>
+        </div>
+
+        {(show('aim') || show('ev')) && (
+          <>
+            <div className="grid grid-cols-2 border-t border-line divide-x divide-line">
+              <Stat
+                label={j.morningApplied ? '朝イチ狙い目' : '狙い目'}
+                icon={<Target size={15} className="text-prio" aria-hidden />}
+                value={rule?.minLine != null ? `${fmtNum(rule.minLine)}${rule.unit}〜` : '未確認'}
+              />
+              <Stat
+                label="推奨範囲"
+                value={(rule?.recommended && fmtRange(rule.recommended.min, rule.recommended.max, rule.unit)) || '未確認'}
+                tone="text-go"
+              />
+            </div>
+            <div className="border-t border-line px-card py-3">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[13px] text-sub shrink-0">期待値</span>
+                <span className={`num text-[26px] font-extrabold leading-none text-right ${rule?.ev ? 'text-ev' : 'text-sub text-[20px]'}`}>
+                  {fmtEvRange(rule?.ev ?? null)}
+                </span>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-dim">
+                {rule?.target && <span>確認対象：{rule.target}</span>}
+                {rule?.ev && (
+                  <span>
+                    前提：{rule.ev.condition.exchangeRate}枚・{rule.ev.condition.play}
+                  </span>
+                )}
+                {rule && <span className="ml-auto"><StatusTag status={rule.status} /></span>}
+              </div>
+            </div>
+          </>
+        )}
+      </section>
 
       {/* 数値タイル */}
       {tiles.length > 0 && <div className="grid grid-cols-2 gap-2.5">{tiles}</div>}
@@ -386,6 +390,17 @@ function ImagePicker({ m, app }: { m: Machine; app: AppState }) {
     </div>
   );
 }
+
+/** 1枚のカード内で並べる数値（ラベル＋値） */
+const Stat = ({ label, value, icon, tone = 'text-fg' }: { label: string; value: string; icon?: ReactNode; tone?: string }) => (
+  <div className="px-card py-3 min-w-0">
+    <div className="flex items-center gap-1 text-[13px] text-sub">
+      {icon}
+      {label}
+    </div>
+    <div className={`num font-extrabold leading-tight mt-1 ${value === '未確認' ? 'text-sub text-[18px]' : `${tone} text-[22px]`}`}>{value}</div>
+  </div>
+);
 
 const Tile = ({ label, value, sub, tone = 'text-fg' }: { label: string; value: string | null; sub?: string; tone?: string }) => (
   <div className="card p-3.5 min-w-0">
